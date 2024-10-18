@@ -1,0 +1,226 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model categories {
+  id         Int          @id @default(autoincrement())
+  name       String       @db.VarChar(255)
+  operations operations[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model educations {
+  id                    Int       @id @default(autoincrement())
+  user_id               Int
+  education_start_year  Int
+  education_start_month Int
+  education_end_year    Int?
+  education_end_month   Int?
+  school_name           String    @db.VarChar(100)
+  order_num             Int
+  created_at            DateTime? @default(now()) @db.Timestamp(6)
+  updated_at            DateTime? @default(now()) @db.Timestamp(6)
+  users                 users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model employments {
+  id              Int       @id @default(autoincrement())
+  user_id         Int
+  job_start_year  Int
+  job_start_month Int
+  job_end_year    Int?
+  job_end_month   Int?
+  company_name    String    @db.VarChar(100)
+  order_num       Int
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  updated_at      DateTime? @default(now()) @db.Timestamp(6)
+  users           users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model job_histories {
+  id              Int       @id @default(autoincrement())
+  user_id         Int
+  company_name    String?   @db.VarChar(255)
+  job_start_year  Int?
+  job_start_month Int?
+  job_end_year    Int?
+  job_end_month   Int?
+  employment_type String?   @db.VarChar(255)
+  job_details     String?
+  order_num       Int?
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  updated_at      DateTime? @default(now()) @db.Timestamp(6)
+  users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, order_num], map: "unique_user_order")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model job_summaries {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  summary    String
+  order_num  Int
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, order_num], map: "job_summaries_unique_user_order")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model licenses {
+  id            Int       @id @default(autoincrement())
+  user_id       Int
+  license_year  Int
+  license_month Int
+  license_name  String    @db.VarChar(100)
+  order_num     Int
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+  users         users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, order_num], map: "licenses_unique_user_order")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model operations {
+  id                  Int                   @id(map: "operation_items_pkey") @default(autoincrement())
+  category_id         Int?
+  name                String                @db.VarChar(255)
+  categories          categories?           @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "operation_items_category_id_fkey")
+  supplementary_texts supplementary_texts[]
+  user_operations     user_operations[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model self_prs {
+  user_id      Int       @unique(map: "self_prs_unique_user_id")
+  self_pr_text String?
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @default(now()) @db.Timestamp(6)
+  id           Int       @id @default(autoincrement())
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model skills_experiences {
+  id         Int       @id @default(autoincrement())
+  user_id    Int       @unique(map: "skills_experiences_user_order")
+  skills     String?
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model supplementary_texts {
+  id           Int         @id @default(autoincrement())
+  operation_id Int?
+  input_text   String
+  user_id      Int
+  created_at   DateTime?   @default(now()) @db.Timestamp(6)
+  updated_at   DateTime?   @default(now()) @db.Timestamp(6)
+  operations   operations? @relation(fields: [operation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "supplementary_texts_item_id_fkey")
+  users        users       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user_basic_info {
+  id                 Int     @default(autoincrement())
+  lineid             String  @db.VarChar(50)
+  last_name          String? @db.VarChar(50)
+  first_name         String? @db.VarChar(50)
+  last_name_kana     String? @db.VarChar(50)
+  first_name_kana    String? @db.VarChar(50)
+  birth_year         Int?
+  birth_month        Int?
+  birth_day          Int?
+  postal_code        String? @db.VarChar(8)
+  prefecture         String? @db.VarChar(50)
+  city               String? @db.VarChar(100)
+  street_address     String? @db.VarChar(100)
+  phone_number       String? @db.VarChar(15)
+  email              String? @db.VarChar(100)
+  additional_contact String? @db.VarChar(100)
+  id_photo           String? @db.VarChar(255)
+
+  @@id([id, lineid])
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model user_experiences {
+  id                   Int       @id @default(autoincrement())
+  user_id              Int       @unique(map: "unique_user_id")
+  windows              Boolean?  @default(false)
+  mac                  Boolean?  @default(false)
+  microsoft_word       Boolean?  @default(false)
+  microsoft_excel      Boolean?  @default(false)
+  microsoft_powerpoint Boolean?  @default(false)
+  poster_design        Boolean?  @default(false)
+  sns_update           Boolean?  @default(false)
+  brochure_creation    Boolean?  @default(false)
+  other_checked        Boolean?  @default(false)
+  other_experience     String?
+  created_at           DateTime? @default(now()) @db.Timestamp(6)
+  updated_at           DateTime? @default(now()) @db.Timestamp(6)
+  users                users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model user_informations {
+  id                      Int       @id @default(autoincrement())
+  user_id                 Int       @unique(map: "user_informations_unique_user_order")
+  last_name               String    @db.VarChar(50)
+  first_name              String    @db.VarChar(50)
+  last_name_kana          String    @db.VarChar(50)
+  first_name_kana         String    @db.VarChar(50)
+  birth_year              Int
+  birth_month             Int       @db.SmallInt
+  birth_day               Int       @db.SmallInt
+  postal_code             String    @db.VarChar(10)
+  prefecture              String    @db.VarChar(50)
+  city                    String    @db.VarChar(100)
+  address                 String    @db.VarChar(255)
+  phone_number            String    @db.VarChar(20)
+  email_address           String    @db.VarChar(100)
+  alternate_email_address String?   @db.VarChar(100)
+  alternate_contact       String?   @db.VarChar(100)
+  photo_url               String?   @db.VarChar(255)
+  created_at              DateTime? @default(now()) @db.Timestamp(6)
+  updated_at              DateTime? @default(now()) @db.Timestamp(6)
+  users                   users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model user_operations {
+  id           Int         @id(map: "user_selections_pkey") @default(autoincrement())
+  user_id      Int
+  operation_id Int?
+  operations   operations? @relation(fields: [operation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_selections_item_id_fkey")
+  users        users       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_selections_user_id_fkey")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model users {
+  id                  Int                   @id @default(autoincrement())
+  line_id             String                @unique @db.VarChar(255)
+  created_at          DateTime?             @default(now()) @db.Timestamp(6)
+  updated_at          DateTime?             @default(now()) @db.Timestamp(6)
+  educations          educations[]
+  employments         employments[]
+  job_histories       job_histories[]
+  job_summaries       job_summaries[]
+  licenses            licenses[]
+  skills_experiences  skills_experiences?
+  supplementary_texts supplementary_texts[]
+  user_experiences    user_experiences?
+  user_informations   user_informations?
+  user_operations     user_operations[]
+}
