@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 export type UserInfo = {
 
     user_id: number;                 // ユーザーID (int, 必須)
@@ -16,7 +18,6 @@ export type UserInfo = {
     email_address: string;           // メールアドレス (varchar(100), 必須)
     alternate_email_address?: string; // 代替メールアドレス (varchar(100), 任意)
     alternate_contact?: string;       // 代替連絡先 (varchar(100), 任意)
-
 
   };
 
@@ -116,7 +117,7 @@ export type UserEmployments = {
 }
 
 
-export const createInitialEmployment = (user_id:number) => {
+export const createInitialEmployment = (user_id:number) :Prisma.employmentsCreateManyInput[]=> {
   return[{
 
     user_id,

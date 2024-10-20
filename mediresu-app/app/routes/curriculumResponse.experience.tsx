@@ -11,13 +11,17 @@ import { WorkHistoryComp } from "~/components/curriculum/WorkHistoryComp";
 import { ItemsAnyComp } from "~/components/userinfo/ItemsAnyComp";
 import { LongTextComp } from "~/components/curriculum/LongTextComp";
 import { BackEndComp } from "~/components/userinfo/BackEndComp";
+import { WHEmpTypeComp } from "~/components/curriculum/WHEmpTypeComp";
+import { Prisma } from "@prisma/client";
+import prisma from "~/utils/prismaClient";
+
 export default function UserExperiencePage() {
 
     const { experienceFormData,updateExperienceFormData,jobHistoryFormData,updateJobHistoryFormData, } = useOutletContext<{
         experienceFormData:UserExperienceType,
         updateExperienceFormData:(newData:Partial<UserExperienceType>) => void;
         jobHistoryFormData:UserJobHistoryType[],
-        updateJobHistoryFormData:(newData:Partial<UserJobHistoryType> & {order_num:number},orderNumKey: keyof UserJobHistoryType) => void;
+        updateJobHistoryFormData:(newData:Partial<any> & {order_num:number},orderNumKey: keyof any) => void;
         
     }>();
 
@@ -39,12 +43,14 @@ export default function UserExperiencePage() {
             updateExperienceFormData({ [name]:value });
         }
     }
-    const jobHistoryHandleInputChange = (
+    const jobHistoryHandleInputChange =async (
         order_num:number,
         field: keyof UserJobHistoryType,
         value:string | number
         ) => {
+        console.log("SSSSSSSSSSSSSSSSS")
         updateJobHistoryFormData({order_num,[field]:value},"order_num")
+        
         };
 
 
@@ -54,7 +60,7 @@ export default function UserExperiencePage() {
         { stepNumber: "STEP.03", title: "保健診療の", subtitle: "経験", isActive: false },
         { stepNumber: "STEP.04", title: "その他の", subtitle: "スキル", isActive: true },
     ];
-    
+    type jobHistoryType = Prisma.PromiseReturnType<typeof prisma.job_histories.findMany>[0];
     return(
         <main className="flex flex-col items-center w-full bg-[#d9ecec]">
             <div className="flex w-full max-w-[375px] items-center justify-center gap-1.5 bg-white py-4">
@@ -81,32 +87,31 @@ export default function UserExperiencePage() {
 
                     <TitleComp className="w-full" text="職務経歴" />
 
-                    <ItemsComp className="!flex-[0_0_auto]" text="勤務先名"/>
-                    <WorkHistoryComp />
+                    {/* <ItemsComp className="!flex-[0_0_auto]" text="勤務先名"/> */}
+
+                    {jobHistoryFormData.map((data:any,index:number) => (
+                        <div key={index}>
+                            <WorkHistoryComp formData={data} />
+                            <ItemsComp className="!flex-[0_0_auto]" text="雇用形態"/>
+                            <WHEmpTypeComp formData={data} handleChange={jobHistoryHandleInputChange}/>
+                            <ItemsAnyComp className="!flex-[0_0_auto]" text="職務内容（1,000文字以内）"/>
+                            <LongTextComp
+                                name="job_details"
+                                value={data.job_details}
+                                formData={data}
+                                handleChange={jobHistoryHandleInputChange}
+                            />
+                        </div>
+                    ))}
+                    {/* <WorkHistoryComp />
 
                     <ItemsComp className="!flex-[0_0_auto]" text="雇用形態"/>
 
-                    <select 
-                        className="w-[70px] h-[38px] mt-2 ml-5 border rounded border-[#cccccc]" 
-                        name="job_end_month" 
-                        >
-                        <option value="">選択</option>
-                        <option value="正職員">正職員</option>
-                        <option value="契約">契約</option>
-                        <option value="委託">委託</option>
-                        <option value="アルバイト">アルバイト</option>
-                    </select>
-                    <ItemsAnyComp className="!flex-[0_0_auto]" text="職務内容（1,000文字以内）"/>
-                    <LongTextComp
-                        className="!self-stretch !h-[150px] !w-full"
-                        divClassName="!mt-[unset]"
-                        frameClassName="!self-stretch"
-                        frameClassNameOverride="!h-[unset] !flex-1 !grow"
-                        text=""
-                        name="skills"
+                    <WHEmpTypeComp/>
 
-                    />
-<BackEndComp className="w-full" img="/img/userinfo/subtract-1.svg" subtract="/img/userinfo/subtract-6.svg" text="完了" backLink="../category-step2" nextLink="/top" />
+                    <ItemsAnyComp className="!flex-[0_0_auto]" text="職務内容（1,000文字以内）"/> */}
+
+                    <BackEndComp className="w-full" img="/img/userinfo/subtract-1.svg" subtract="/img/userinfo/subtract-6.svg" text="完了" backLink="../category-step2" nextLink="/top" />
                 </div>
             </div>
         </main>

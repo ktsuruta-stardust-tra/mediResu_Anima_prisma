@@ -32,7 +32,7 @@ export const LicenseDateComp = ({
             className="w-full h-[38px] bg-transparent text-left text-sm border rounded border-[#cccccc]" 
             name="license_year" 
             defaultValue={formData?.license_year || ""} 
-            onChange={(e) => handleChange(formData?.order_num || 0,"license_year",e.target.value)}
+            onChange={(e) => handleChange(formData?.order_num || 0,"license_year",Number(e.target.value))}
             >
             <option value="">年を選択</option>
             {years.map((y) => (
@@ -50,7 +50,7 @@ export const LicenseDateComp = ({
           className="w-[70px] h-[38px] border rounded border-[#cccccc]" 
           name="license_month" 
           defaultValue={formData?.license_month || ""} 
-          onChange={(e)=>handleChange(formData?.order_num || 0,"license_month",e.target.value)}
+          onChange={(e)=>handleChange(formData?.order_num || 0,"license_month",Number(e.target.value))}
           >
 
           <option value="">選択</option>

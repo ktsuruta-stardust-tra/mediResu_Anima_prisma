@@ -5,9 +5,11 @@ Please share your feedback here: https://form.asana.com/?k=uvp-HPgd3_hyoXRBw1IcN
 
 import React from "react";
 import { UserEmployments } from "~/types/user";
+import { Prisma } from "@prisma/client";
+import prisma from "~/utils/prismaClient";
 interface Props {
   className: any;
-  formData?:UserEmployments;
+  formData?:Prisma.PromiseReturnType<typeof prisma.employments.findMany>[0];
   handleChange: (order_num:number,field:keyof UserEmployments,value:number|string) => void;
 }
 
@@ -33,7 +35,7 @@ export const WorkHistoryDateComp = ({
             className="w-full h-[38px] bg-transparent text-left text-sm border rounded border-[#cccccc]" 
             name="job_start_year" 
             defaultValue={formData?.job_start_year || ""} 
-            onChange={(e) => handleChange(formData?.order_num || 0,"job_start_year",e.target.value)}
+            onChange={(e) => handleChange(formData?.order_num || 0,"job_start_year",Number(e.target.value))}
             >
             <option value="">年を選択</option>
             {years.map((y) => (
@@ -51,7 +53,7 @@ export const WorkHistoryDateComp = ({
           className="w-[70px] h-[38px] border rounded border-[#cccccc]" 
           name="job_start_month" 
           defaultValue={formData?.job_start_month || ""} 
-          onChange={(e)=>handleChange(formData?.order_num || 0,"job_start_month",e.target.value)}
+          onChange={(e)=>handleChange(formData?.order_num || 0,"job_start_month",Number(e.target.value))}
           >
 
           <option value="">選択</option>
@@ -65,9 +67,21 @@ export const WorkHistoryDateComp = ({
         <div className="inline-flex items-center justify-center px-1.5">
             <div className="text-[#313131] text-xs">月</div>
         </div>
-        <div className="inline-flex items-center justify-center px-1.5">
-            <div className="text-[#313131] text-xs">入学</div>
-        </div>
+
+
+        <select 
+          className="inline-flex w-[70px] h-[38px] mt-0 border rounded border-[#cccccc]" 
+          name="job_start_status"
+          defaultValue={formData?.job_start_status|| ""} 
+          onChange={(e) => handleChange(formData?.order_num || 0,"job_start_status",e.target.value)}
+          >
+          <option value="">選択</option>
+          <option value="入社">入社</option>
+          <option value="入職">入職</option>
+        </select>
+
+
+
       </div>
 
       {/* 卒業年・月 */}
@@ -77,7 +91,7 @@ export const WorkHistoryDateComp = ({
             className="w-full h-[38px] bg-transparent text-left text-sm border rounded border-[#cccccc]" 
             name="job_end_year" 
             defaultValue={formData?.job_end_year || ""} 
-            onChange={(e) => handleChange(formData?.order_num || 0,"job_end_year",e.target.value)} 
+            onChange={(e) => handleChange(formData?.order_num || 0,"job_end_year",Number(e.target.value))} 
             >
             <option value="">年を選択</option>
             {years.map((y) => (
@@ -95,7 +109,7 @@ export const WorkHistoryDateComp = ({
           className="w-[70px] h-[38px] border rounded border-[#cccccc]" 
           name="job_end_month" 
           defaultValue={formData?.job_end_month|| ""} 
-          onChange={(e) => handleChange(formData?.order_num || 0,"job_end_month",e.target.value)}
+          onChange={(e) => handleChange(formData?.order_num || 0,"job_end_month",Number(e.target.value))}
           >
           <option value="">選択</option>
           {months.map((m) => (

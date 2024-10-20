@@ -8,15 +8,15 @@ import React from "react";
 
 interface Props {
   className: any;
-  element: string;
+  
 }
 
-export const UploadImgComp = ({ className, element = "/img/userinfo/1-1.svg" }: Props): JSX.Element => {
+export const UploadImgComp = ({ className}: Props): JSX.Element => {
   return (
     <div className={`flex w-[335px] items-start gap-[15px] pt-2.5 pb-0 px-5 relative ${className}`}>
       <div className="flex items-start gap-[5px] relative flex-1 grow">
         <div className="inline-flex items-center gap-1 px-5 py-3 relative flex-[0_0_auto] bg-white rounded border border-solid border-[#cccccc]">
-          <img className="relative w-[13.57px] h-[13.46px]" alt="Element" src={element} />
+          <img className="relative w-[13.57px] h-[13.46px]" alt="Element" src="/img/userinfo/1-2.svg" />
           <div className="relative w-fit mt-[-1.00px] [font-family:'Inter',Helvetica] font-medium text-black text-sm tracking-[0] leading-[normal]">
             写真をアップロードする
           </div>

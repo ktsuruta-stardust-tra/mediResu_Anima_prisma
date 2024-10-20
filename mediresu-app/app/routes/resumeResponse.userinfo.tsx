@@ -77,7 +77,7 @@ export default function ResumeLayout(){
                     <ItemsComp className="!flex-[0_0_auto]" text="メールアドレス" />
                     <BaseTextComp className="!self-stretch !w-full" text="" value={formData.email_address} name={"email_address"} handleChange={handleChange}/>
                     <ItemsAnyComp className="!flex-[0_0_auto]" text="証明写真" />
-                    <UploadImgComp className="!self-stretch !w-full" element="/img/userinfo/1-2.svg" />
+                    <UploadImgComp className="!self-stretch !w-full" />
                     <BackNextComp className="!self-stretch !w-full" img="/img/userinfo/subtract-7.svg" subtract="/img/userinfo/subtract-6.svg" topLink="/top" nextLink="../backgroundhanyo"/>
                 </div>
             </div>

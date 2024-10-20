@@ -8,8 +8,8 @@ export function useUserAddedFormManager<T>(initialData: T[],defaultItem:T) {
     const updateAddedFormData = (newData:Partial<T>, orderNumKey: keyof T) => {
         setAddedFormData((prevData) => {
 
-            console.log("Previous Data:", prevData);
-            console.log("New Data (with order_num):", newData);
+            // console.log("Previous Data:", prevData);
+            // console.log("New Data (with order_num):", newData);
             // // console.log(prevData);
             // console.log("ordernumkey",orderNumKey);
 

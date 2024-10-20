@@ -15,34 +15,102 @@ import { createDefaultUserJobSummary,createInitialUserJobSummary } from '~/types
 import { createInitialSkillExperience } from '~/types/curriculumDatas';
 import { useUserForm } from '~/hooks/useUserForm';
 import { HeaderComp } from '~/components/userinfo/HeaderComp';
+import prisma from '~/utils/prismaClient';
+import { Prisma } from '@prisma/client';
+import { deleteUserDataPrisma, insertSupplementaryTextsPrisma, insertUserOperationsPrisma } from '~/services/delsertOperationDataPrisma';
+import { upsertFormDataPrisma } from '~/services/upsertFormDataPrisma';
+import { upsertOrderNumPrisma } from '~/services/upsertOrderNumPrisma';
+import { syncEmploymentsWithJobHistories } from '~/utils/transferEmploymentsToJobHistories';
 
 const userId = 1;
+
 export const loader = async () => {
+    try {
+      const [
+        categories,
+        initialSelectedIdsObj,
+        otherInitialDataObj,
+        tempUserExperienceFormData,
+        tempUserJobHistory,
+        tempUserJobSummary,
+        tempSkills,
+      ] = await Promise.all([
 
-    const { data:categories } = await supabase.from("categories").select("id, name , operations(id,name)");
+        // categoriesのデータ取得
+        prisma.categories.findMany({
+          include: {
+            operations: true, // リレーションされたoperationsを含めて取得
+          },
+        }),
+  
+        // user_operationsのデータ取得
+        prisma.user_operations.findMany({
+          where: { user_id: userId },
+          select: { operation_id: true },
+        }),
+  
+        // supplementary_textsのデータ取得
+        prisma.supplementary_texts.findMany({
+          where: { user_id: userId },
+          select: {
+            operation_id: true,
+            input_text: true,
+          },
+        }),
+  
+        // user_experiencesのデータ取得
+        prisma.user_experiences.findMany({
+          where: { user_id: userId },
+        }),
+  
+        //job_history
+        syncEmploymentsWithJobHistories(userId),
+        
 
-    const {data:initialSelectedIdsObj} = await supabase.from("user_operations").select("operation_id").eq("user_id",userId);
+        // job_summariesのデータ取得
+        prisma.job_summaries.findMany({
+          where: { user_id: userId },
+        }),
+  
+        // skills_experiencesのデータ取得
+        prisma.skills_experiences.findMany({
+          where: { user_id: userId },
+        }),
 
-    let initialSelectedIds= []
-    if(initialSelectedIdsObj){
+ 
+
+      ]);
+  
+      // user_operationsの処理
+      let initialSelectedIds = [];
+      if (initialSelectedIdsObj) {
         initialSelectedIds = initialSelectedIdsObj.map((item) => item.operation_id);
-    }
-    
-    const {data:otherInitialDataObj} = await supabase.from("supplementary_texts").select("operation_id,input_text").eq("user_id",userId);
-    const otherInitialData = otherInitialDataObj?.reduce((acc,item) => {
-        acc[item.operation_id] = item.input_text;
+      }
+  
+      // supplementary_textsの処理
+      type SupplementaryText = Prisma.PromiseReturnType<typeof prisma.supplementary_texts.findMany>[0];
+      const otherInitialData = otherInitialDataObj?.reduce((acc, item: SupplementaryText) => {
+        if (item.operation_id !== null) {
+          acc[item.operation_id] = item.input_text;
+        }
         return acc;
-    },{} as Record<number,string>);
-
-    const {data:tempUserExperienceFormData} = await supabase.from("user_experiences").select("*").eq("user_id",userId);
-    const {data:tempUserJobHistory} = await supabase.from("job_histories").select("*").eq("user_id",userId).order("order_num",{ascending:true});
-
-    const {data:tempUserJobSummary} = await supabase.from("job_summaries").select("*").eq("user_id",userId);
-    
-    const {data:tempSkills} = await supabase.from("skills_experiences").select("*").eq("user_id",userId);
-
-    return {categories,initialSelectedIds,otherInitialData,tempUserExperienceFormData,tempUserJobHistory,tempUserJobSummary,tempSkills}
-}
+      }, {} as Record<number, string>);
+  
+      return {
+        categories,
+        initialSelectedIds,
+        otherInitialData,
+        tempUserExperienceFormData,
+        tempUserJobHistory,
+        tempUserJobSummary,
+        tempSkills,
+      };
+    } catch (err) {
+      console.error("Error loading data:", err);
+      throw new Response("Error loading data", { status: 500 });
+    }
+  };
+  
 
 export const action:ActionFunction = async ({request}) => {
     const formData = await request.formData();
@@ -54,50 +122,53 @@ export const action:ActionFunction = async ({request}) => {
     const itemIds = selectedItems ? selectedItems.split(',').map(Number) : [];
     const skillsFormData = JSON.parse(formData.get("skillsFormData") as string);
 
-    let result = await deleteUserData(userId, "user_operations");
+    let result = await deleteUserDataPrisma(userId, "user_operations");
     
     if (result.status === "error") {
         
         return new Response(result.message, { status: 500 })
 
-    } 
-    result = await deleteUserData(userId, "supplementary_texts");
+    }
+
+    result = await deleteUserDataPrisma(userId, "supplementary_texts");
 
     if (result.status === "error") {
         return new Response(result.message, { status: 500 })
 
     } 
 
-    result = await insertUserOperations(userId,itemIds,"user_operations");
+    if(itemIds.length > 0){
+        result = await insertUserOperationsPrisma(userId,itemIds,"user_operations");
+
+
+        if (result.status === "error") {
+            return new Response(result.message, { status: 500 })
+        } 
+    }
+
+    result = await insertSupplementaryTextsPrisma(userId,otherTexts,"supplementary_texts");
 
     if (result.status === "error") {
         return new Response(result.message, { status: 500 })
 
     } 
 
-    result = await insertSupplementaryTexts(userId,otherTexts,"supplementary_texts");
+    await upsertFormDataPrisma(experienceFormData,"user_experiences");
 
-    if (result.status === "error") {
-        return new Response(result.message, { status: 500 })
-
-    } 
-
-    await upsertFormData(experienceFormData,"user_experiences");
-
-    // 全てのupsertOrderNumを並行して実行
-    await Promise.all(
-        jobHistoryFormDatas.map((jobHistoryFormData:any) => 
-            upsertOrderNum(jobHistoryFormData, "job_histories")
-        )
+    // // 全てのupsertOrderNumを並行して実行
+    // await Promise.all(
+    //     jobHistoryFormDatas.map((jobHistoryFormData:any) => 
+    //         upsertOrderNumPrisma(jobHistoryFormData, "job_histories")
+    //     )
         
-    );
+    // );
     // 全てのupsertOrderNumを並行して実行
 
 
-    await upsertFormData(jobSummaryFormData,"job_summaries");
+    await upsertFormDataPrisma(jobSummaryFormData,"job_summaries");
 
-    await upsertFormData(skillsFormData,"skills_experiences");
-    return redirect("/");
+    await upsertFormDataPrisma(skillsFormData,"skills_experiences");
+    return redirect("/top");
 
 }
 
@@ -106,13 +177,6 @@ export default function ParentForm() {
         otherInitialData,tempUserExperienceFormData,
         tempUserJobHistory,tempUserJobSummary,tempSkills
     }= useLoaderData<any>();
-
-    // console.log(initialSelectedIds)
-    // console.log(otherInitialData);
-
-    // const initialSelectedIds = [1, 3, 5,53,20];
-    // const otherInitialData = {20:"aaaaa"};
-
 
       // `categories`から「その他」のIDと初期テキストを動的に生成
     const otherIds = categories.flatMap((category:any) =>
@@ -129,7 +193,9 @@ export default function ParentForm() {
     const initialExperienceFormData = tempUserExperienceFormData?.length > 0 ? tempUserExperienceFormData[0]:createDefaultUserExperience(userId);
     const [experienceFormData,updateExperienceFormData] = useExperienceItems<any>(initialExperienceFormData);
 
-    const initialJobHistoryFormData = tempUserJobHistory?.length > 0 ? tempUserJobHistory:createInitialUserJobHistory(userId);
+    type jobHistoryType = Prisma.PromiseReturnType<typeof prisma.job_histories.findMany>[0]
+    const initialJobHistoryFormData = tempUserJobHistory;
+
     const [jobHistoryFormData,updateJobHistoryFormData] = useUserAddedFormManager<any>(initialJobHistoryFormData,createDefaultUserJobHistory(userId));
 
     const initialJobSummaryFormData = tempUserJobSummary?.length > 0 ? tempUserJobSummary[0]:createInitialUserJobSummary(userId);
@@ -186,17 +252,25 @@ export default function ParentForm() {
 
 
                 {/* フッター */}
-                <div className="w-full px-4 py-2 mt-4">
-                    <div className="flex items-center justify-center gap-4 py-2">
-                        <button className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
-                            保存する
-                        </button>
-                        <button className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
-                            プレビュー
-                        </button>
+                <Form method='post'>
+                    <div className="w-full px-4 py-2 mt-4">
+                        <div className="flex items-center justify-center gap-4 py-2">
+                            {/* `selectedItems`と`otherTexts`を文字列に変換して送信 */}
+                            <input type="hidden" name="selectedItems" value={Array.from(selectedItems).join(',')} />
+                            <input type="hidden" name="otherTexts" value={JSON.stringify(otherTexts)} />
+                            <input type="hidden" name="experienceFormData" value={JSON.stringify(experienceFormData)} />
+                            <input type="hidden" name="jobHistoryFormData" value={JSON.stringify(jobHistoryFormData)} />
+                            <input type="hidden" name="jobSummaryFormData" value={JSON.stringify(jobSummaryFormData)} />
+                            <input type="hidden" name="skillsFormData" value={JSON.stringify(skillsExperienceFormData)} />
+                            <button className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
+                                保存する
+                            </button>
+                            <button className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
+                                プレビュー
+                            </button>
+                        </div>
                     </div>
-                </div>
-
+                </Form>
                 <div className="w-full border-b border-[#24b6ae] mt-2"></div>
                 <p className="text-[#3d3d3d] text-[10px] px-4 py-2 mt-2 text-center">
                     Copyright © 2024 LOGICA Inc. All Rights Reserved.

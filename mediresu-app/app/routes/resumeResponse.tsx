@@ -14,7 +14,11 @@ import { useUserForm } from "~/hooks/useUserForm";
 import { upsertFormData } from "~/services/upsertFormData";
 import { HeaderComp } from "~/components/userinfo/HeaderComp";
 import { SavePreviewComp } from "~/components/userinfo/SavePreviewComp";
-
+import prisma from "~/utils/prismaClient";
+import { Prisma } from "@prisma/client";
+import { upsertFormDataPrisma } from "~/services/upsertFormDataPrisma";
+import { upsertOrderNumPrisma } from "~/services/upsertOrderNumPrisma";
+import { convertToPrismaType } from "~/utils/convertToPrismaType";
 // バリデーションエラーデータの型定義
 type ValidationError = {
     [key: string]: string;
@@ -39,78 +43,108 @@ export const action:ActionFunction = async ({request}) => {
 
     // データベースへの保存処理やその他の処理をここで行う
     // 例: SupabaseやPrismaなどを使って保存
-    console.log(formData);
-    // console.log("Form Data:", receivedFormData);
-    console.log("Education Data:", receivedEducationData);
+    // console.log(formData);
+    // // console.log("Form Data:", receivedFormData);
+    // console.log("Education Data:", receivedEducationData);
     // console.log("Education Data:", receivedEmploymentData);
    
-    try{
+    // try{
         // Yupスキーマを使用してバリデーション
-        await userInfoSchema.validate(receivedFormData, { abortEarly: false });
+        //await userInfoSchema.validate(receivedFormData, { abortEarly: false });
     
         if(receivedFormData){
             
-            const userInfoResult = await upsertFormData(receivedFormData,"user_informations");
+            //const userInfoResult = await upsertFormData(receivedFormData,"user_informations");
+            const userInfoResult = await upsertFormDataPrisma(receivedFormData,"user_informations");
             console.log("Info")
             console.log(userInfoResult);
         }
         if(receivedEducationData){
-            const userEducationResult = await upsertUserBackgroundData(receivedEducationData,"educations");
+            // const userEducationResult = await upsertUserBackgroundData(receivedEducationData,"educations");
 
             console.log("edu")
-            console.log(userEducationResult);
+            // console.log(userEducationResult);
+
+            
+            await Promise.all(
+                receivedEducationData.map(async (educationData:any) => {
+                    await upsertOrderNumPrisma(educationData, "educations")
+                })
+            );
         }
         if(receivedEmploymentData){
-            const UserEmploymentResult = await upsertUserBackgroundData(receivedEmploymentData, "employments");
+            // const UserEmploymentResult = await upsertUserBackgroundData(receivedEmploymentData, "employments");
 
             console.log("emp")
-            console.log(UserEmploymentResult);
+
+            receivedEmploymentData.map(async (employmentData:any) => {
+                await upsertOrderNumPrisma(employmentData, "employments")
+            })
         }
 
         // 全てのupsertOrderNumを並行して実行
         await Promise.all(
             receivedLicenseDatas.map((receivedLicenseData:any) => 
-                upsertOrderNum(receivedLicenseData, "licenses")
+                upsertOrderNumPrisma(receivedLicenseData, "licenses")
             )
         );
 
-        await upsertFormData(receivedPrData,"self_prs");
+        // await upsertFormData(receivedPrData,"self_prs");
+        const prResult = await upsertFormDataPrisma(receivedPrData,"self_prs");
 
 
-    }catch (validationError: any) {
-        // Yupのバリデーションエラーをキャッチし、エラーメッセージを返す
-        const errors: ValidationError = validationError.inner.reduce((acc: ValidationError, err: any) => {
-          acc[err.path] = err.message;
-          return acc;
-        }, {});
-        console.log("Error")
-        console.log(errors);
-        return json({ errors }, { status: 400 });
-    }    
+    // }catch (validationError: any) {
+    //     // Yupのバリデーションエラーをキャッチし、エラーメッセージを返す
+    //     const errors: ValidationError = validationError.inner.reduce((acc: ValidationError, err: any) => {
+    //       acc[err.path] = err.message;
+    //       return acc;
+    //     }, {});
+    //     console.log("Error")
+    //     console.log(errors);
+    //     return json({ errors }, { status: 400 });
+    // }    
 
-    return redirect("/");
+    return redirect("/top");
 }
 
 
 
 export const loader = async () => {
 
-    const [userInfo,userEdus,userEmps,userLicenses,userPr]= await Promise.all([
-        supabase.from("user_informations").select("*").eq("user_id",userId),
-        supabase.from("educations").select("*").eq("user_id",userId).order("order_num",{ascending:true}),
-        supabase.from("employments").select("*").eq("user_id",userId).order("order_num",{ascending:true}),
-        supabase.from("licenses").select("*").eq("user_id",userId).order("order_num",{ascending:true}),
-        supabase.from("self_prs").select("*").eq("user_id",userId),
-    ]);
-
-
-
-    if(userInfo.error || userEdus.error || userEmps.error){
-        throw new Response("Error fetching data",{status:500});
-    }
-    // console.log("LLLLLLLLLLLL")
-    // console.log(userEdus)
-    return json({userInfo:userInfo.data,userEdus:userEdus.data,userEmps:userEmps.data,userLicenses:userLicenses.data,userPr:userPr.data,});
+    try {
+        const [userInfo, userEdus, userEmps, userLicenses, userPr] = await Promise.all([
+          prisma.user_informations.findMany({
+            where: { user_id: userId },
+          }),
+          prisma.educations.findMany({
+            where: { user_id: userId },
+            orderBy: { order_num: 'asc' },
+          }),
+          prisma.employments.findMany({
+            where: { user_id: userId },
+            orderBy: { order_num: 'asc' },
+          }),
+          prisma.licenses.findMany({
+            where: { user_id: userId },
+            orderBy: { order_num: 'asc' },
+          }),
+          prisma.self_prs.findMany({
+            where: { user_id: userId },
+          }),
+        ]);
+    
+        // データの返却
+        return json({
+          userInfo,
+          userEdus,
+          userEmps,
+          userLicenses,
+          userPr,
+        });
+      } catch (error) {
+        // エラーハンドリング
+        throw new Response("Error fetching data", { status: 500 });
+      }
 
 }
 
@@ -130,11 +164,13 @@ export default function ResumeLayout(){
     // console.log(initialData)
     // console.log(formData);
   
+    //const [educationFormData,updateEducationFormData] = useUserAddedFormManager<Prisma.educationsCreateInput>(
     const [educationFormData,updateEducationFormData] = useUserAddedFormManager<UserEducations>(
         initialEducationData,
         createDefaultEducation(userId),
     )
-    const [employmentFormData,updateEmploymentFormData] = useUserAddedFormManager<UserEmployments>(
+    type userEmploymentType = Prisma.PromiseReturnType<typeof prisma.employments.findMany>[0];
+    const [employmentFormData,updateEmploymentFormData] = useUserAddedFormManager<userEmploymentType>(
         initialEmploymentData,
         createDefaultEmployment(userId),
     )
@@ -165,16 +201,25 @@ export default function ResumeLayout(){
         </div>
 
         {/* フッター */}
-        <div className="w-full px-4 py-2 mt-4">
-            <div className="flex items-center justify-center gap-4 py-2">
-                <button className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
-                    保存する
-                </button>
-                <button className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
-                    プレビュー
-                </button>
+        <Form method="post">
+            <div className="w-full px-4 py-2 mt-4">
+                <div className="flex items-center justify-center gap-4 py-2">
+
+                    <input type="hidden" name="formData" value={JSON.stringify(formData)} />
+                    <input type="hidden" name="employmentFormData" value={JSON.stringify(employmentFormData)} />
+                    <input type="hidden" name="educationFormData" value={JSON.stringify(educationFormData)} />
+                    <input type="hidden" name="licenseFormData" value={JSON.stringify(licenseFormData)} />
+                    <input type="hidden" name="prFormData" value={JSON.stringify(prFormData)} />
+
+                    <button type="submit" className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
+                        保存する
+                    </button>
+                    <button className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
+                        プレビュー
+                    </button>
+                </div>
             </div>
-        </div>
+        </Form>
 
         <div className="w-full border-b border-[#24b6ae] mt-2"></div>
         <p className="text-[#3d3d3d] text-[10px] px-4 py-2 mt-2 text-center">

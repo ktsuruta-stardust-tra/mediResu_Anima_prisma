@@ -21,13 +21,17 @@ model educations {
   user_id               Int
   education_start_year  Int
   education_start_month Int
-  education_end_year    Int?
-  education_end_month   Int?
+  education_end_year    Int
+  education_end_month   Int
+  education_end_status  String
   school_name           String    @db.VarChar(100)
   order_num             Int
   created_at            DateTime? @default(now()) @db.Timestamp(6)
   updated_at            DateTime? @default(now()) @db.Timestamp(6)
   users                 users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  // `user_id`と`order_num`のユニーク制約
+  @@unique([user_id, order_num])
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -36,6 +40,7 @@ model employments {
   user_id         Int
   job_start_year  Int
   job_start_month Int
+  job_start_status  String
   job_end_year    Int?
   job_end_month   Int?
   company_name    String    @db.VarChar(100)
@@ -43,6 +48,9 @@ model employments {
   created_at      DateTime? @default(now()) @db.Timestamp(6)
   updated_at      DateTime? @default(now()) @db.Timestamp(6)
   users           users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  // `user_id`と`order_num`のユニーク制約
+  @@unique([user_id, order_num], map: "employments_unique_user_order")
 }
 
 model job_histories {
@@ -51,16 +59,18 @@ model job_histories {
   company_name    String?   @db.VarChar(255)
   job_start_year  Int?
   job_start_month Int?
+  job_start_status  String?
   job_end_year    Int?
   job_end_month   Int?
-  employment_type String?   @db.VarChar(255)
-  job_details     String?
+  employment_type String   
+  job_details     String?  @db.VarChar(1000)
   order_num       Int?
   created_at      DateTime? @default(now()) @db.Timestamp(6)
   updated_at      DateTime? @default(now()) @db.Timestamp(6)
   users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([user_id, order_num], map: "unique_user_order")
+  // `user_id`と`order_num`のユニーク制約
+  @@unique([user_id, order_num], map: "job_histories_unique_user_order")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -68,12 +78,11 @@ model job_summaries {
   id         Int       @id @default(autoincrement())
   user_id    Int
   summary    String
-  order_num  Int
   created_at DateTime? @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
   users      users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([user_id, order_num], map: "job_summaries_unique_user_order")
+  @@unique([user_id], map: "job_summaries_unique_user")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -192,7 +201,7 @@ model user_informations {
   email_address           String    @db.VarChar(100)
   alternate_email_address String?   @db.VarChar(100)
   alternate_contact       String?   @db.VarChar(100)
-  photo_url               String?   @db.VarChar(255)
+  photo_base64            String?   @db.Text // Base64エンコードされた写真データを格納
   created_at              DateTime? @default(now()) @db.Timestamp(6)
   updated_at              DateTime? @default(now()) @db.Timestamp(6)
   users                   users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -223,4 +232,18 @@ model users {
   user_experiences    user_experiences?
   user_informations   user_informations?
   user_operations     user_operations[]
+  user_photos         user_photos?         // 新しく追加されるフィールド
 }
+
+
+model user_photos {
+  id        Int     @id @default(autoincrement())
+  user_id   Int     @unique  // user_idをユニークにする
+  photo_url String  @db.Text // Base64エンコードされた写真データを格納
+  created_at DateTime @default(now()) // 作成日時
+  updated_at DateTime @updatedAt      // 更新日時
+
+  // ユーザーとの1対1のリレーション
+  users     users   @relation(fields: [user_id], references: [id])
+}
+

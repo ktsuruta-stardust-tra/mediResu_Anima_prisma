@@ -1,5 +1,6 @@
 import { json } from "@remix-run/react";
 import { supabase } from "~/utils/supabaseClient";
+import prisma from "~/utils/prismaClient";
 
 export const deleteUserData = async (userId: number, tableName: string) => {
     try {
