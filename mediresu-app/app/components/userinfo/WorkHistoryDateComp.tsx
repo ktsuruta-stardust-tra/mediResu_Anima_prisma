@@ -50,7 +50,7 @@ export const WorkHistoryDateComp = ({
         </div>
        
         <select 
-          className="w-[70px] h-[38px] border rounded border-[#cccccc]" 
+          className="w-[70px] h-[38px] border rounded bg-transparent border-[#cccccc]" 
           name="job_start_month" 
           defaultValue={formData?.job_start_month || ""} 
           onChange={(e)=>handleChange(formData?.order_num || 0,"job_start_month",Number(e.target.value))}
@@ -70,7 +70,7 @@ export const WorkHistoryDateComp = ({
 
 
         <select 
-          className="inline-flex w-[70px] h-[38px] mt-0 border rounded border-[#cccccc]" 
+          className="inline-flex w-[70px] h-[38px] mt-0 border rounded bg-transparent border-[#cccccc]" 
           name="job_start_status"
           defaultValue={formData?.job_start_status|| ""} 
           onChange={(e) => handleChange(formData?.order_num || 0,"job_start_status",e.target.value)}
@@ -106,7 +106,7 @@ export const WorkHistoryDateComp = ({
         </div>
 
         <select 
-          className="w-[70px] h-[38px] border rounded border-[#cccccc]" 
+          className="w-[70px] h-[38px] border rounded border-[#cccccc] bg-transparent" 
           name="job_end_month" 
           defaultValue={formData?.job_end_month|| ""} 
           onChange={(e) => handleChange(formData?.order_num || 0,"job_end_month",Number(e.target.value))}

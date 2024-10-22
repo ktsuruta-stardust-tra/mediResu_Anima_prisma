@@ -1,5 +1,5 @@
 // ParentForm.tsx
-import { Outlet,Form,useLoaderData } from '@remix-run/react';
+import { Outlet,Form,useLoaderData, useOutletContext } from '@remix-run/react';
 import { useState } from 'react';
 import { supabase } from '~/utils/supabaseClient';
 import { ActionFunction } from '@remix-run/node';
@@ -21,10 +21,13 @@ import { deleteUserDataPrisma, insertSupplementaryTextsPrisma, insertUserOperati
 import { upsertFormDataPrisma } from '~/services/upsertFormDataPrisma';
 import { upsertOrderNumPrisma } from '~/services/upsertOrderNumPrisma';
 import { syncEmploymentsWithJobHistories } from '~/utils/transferEmploymentsToJobHistories';
+import { sessionStorage } from '~/utils/session';
 
-const userId = 1;
 
-export const loader = async () => {
+export const loader = async ({request}) => {
+  const session = await sessionStorage.getSession(request.headers.get("Cookie"));
+  const userId = session.get("userId");
+  if(userId)
     try {
       const [
         categories,
@@ -77,8 +80,6 @@ export const loader = async () => {
           where: { user_id: userId },
         }),
 
- 
-
       ]);
   
       // user_operationsの処理
@@ -121,7 +122,7 @@ export const action:ActionFunction = async ({request}) => {
     const jobSummaryFormData = JSON.parse(formData.get("jobSummaryFormData") as string);
     const itemIds = selectedItems ? selectedItems.split(',').map(Number) : [];
     const skillsFormData = JSON.parse(formData.get("skillsFormData") as string);
-
+    const {userId} = useOutletContext<any>();
     let result = await deleteUserDataPrisma(userId, "user_operations");
     
     if (result.status === "error") {
@@ -155,16 +156,15 @@ export const action:ActionFunction = async ({request}) => {
 
     await upsertFormDataPrisma(experienceFormData,"user_experiences");
 
-    // // 全てのupsertOrderNumを並行して実行
-    // await Promise.all(
-    //     jobHistoryFormDatas.map((jobHistoryFormData:any) => 
-    //         upsertOrderNumPrisma(jobHistoryFormData, "job_histories")
-    //     )
-        
-    // );
     // 全てのupsertOrderNumを並行して実行
-
-
+    console.log(jobHistoryFormDatas)
+    await Promise.all(
+        jobHistoryFormDatas.map((jobHistoryFormData:any) => 
+            upsertOrderNumPrisma(jobHistoryFormData, "job_histories")
+        )
+        
+    );
+    // 全てのupsertOrderNumを並行して実行
     await upsertFormDataPrisma(jobSummaryFormData,"job_summaries");
 
     await upsertFormDataPrisma(skillsFormData,"skills_experiences");
@@ -177,6 +177,8 @@ export default function ParentForm() {
         otherInitialData,tempUserExperienceFormData,
         tempUserJobHistory,tempUserJobSummary,tempSkills
     }= useLoaderData<any>();
+
+    const userId = useOutletContext<any>();
 
       // `categories`から「その他」のIDと初期テキストを動的に生成
     const otherIds = categories.flatMap((category:any) =>
@@ -248,8 +250,6 @@ export default function ParentForm() {
                     jobSummaryFormData,updateJobSummaryFormData,
                     skillsExperienceFormData,updateSkillsExperienceFormData,
                 }} />
-
-
 
                 {/* フッター */}
                 <Form method='post'>

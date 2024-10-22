@@ -25,10 +25,18 @@ export default function UserExperiencePage() {
         
     }>();
 
+    let isRegistered = false;
+    if(jobHistoryFormData.length > 0){
+        if(jobHistoryFormData[0].company_name !== ""){
+            isRegistered = true;
+        }
+    } 
+    
+
     const handleChange =async (name:string,value:any) => {
         // const{name,value} = e.target;
 
-        console.log(experienceFormData)
+        // console.log(experienceFormData)
         if(name === "other_experience"){
             if(experienceFormData.other_checked){
                 updateExperienceFormData({ [name]:value });
@@ -48,7 +56,7 @@ export default function UserExperiencePage() {
         field: keyof UserJobHistoryType,
         value:string | number
         ) => {
-        console.log("SSSSSSSSSSSSSSSSS")
+
         updateJobHistoryFormData({order_num,[field]:value},"order_num")
         
         };
@@ -60,6 +68,7 @@ export default function UserExperiencePage() {
         { stepNumber: "STEP.03", title: "保健診療の", subtitle: "経験", isActive: false },
         { stepNumber: "STEP.04", title: "その他の", subtitle: "スキル", isActive: true },
     ];
+
     type jobHistoryType = Prisma.PromiseReturnType<typeof prisma.job_histories.findMany>[0];
     return(
         <main className="flex flex-col items-center w-full bg-[#d9ecec]">
@@ -89,7 +98,7 @@ export default function UserExperiencePage() {
 
                     {/* <ItemsComp className="!flex-[0_0_auto]" text="勤務先名"/> */}
 
-                    {jobHistoryFormData.map((data:any,index:number) => (
+                    {isRegistered && jobHistoryFormData.map((data:any,index:number) => (
                         <div key={index}>
                             <WorkHistoryComp formData={data} />
                             <ItemsComp className="!flex-[0_0_auto]" text="雇用形態"/>

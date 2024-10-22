@@ -11,6 +11,5 @@ export function useUserForm<T>(initialData:T){
         }));
     };
 
-
     return [formData,updateFormData];
 }

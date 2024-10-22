@@ -41,14 +41,13 @@ export default function PhotoUploader() {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    console.log("PPPPPPPPPPPPPPP")
-    console.log(file)
-    console.log("KKKKKKKKKKKKKKKKKKKK")
+    // console.log("PPPPPPPPPPPPPPP")
+    // console.log(file)
+    // console.log("KKKKKKKKKKKKKKKKKKKK")
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result?.toString();
-        console.log(base64String);
         setBase64(base64String || null);
       };
       reader.readAsDataURL(file); // Base64形式に変換

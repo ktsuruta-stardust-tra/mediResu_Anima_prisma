@@ -51,7 +51,7 @@ export const AcademicDateComp = ({
         </div>
        
         <select 
-          className="w-[70px] h-[38px] border rounded border-[#cccccc]" 
+          className="w-[70px] h-[38px] border rounded bg-transparent  border-[#cccccc]" 
           name="education_start_month" 
           defaultValue={formData?.education_start_month || ""} 
           onChange={(e)=>handleChange(formData?.order_num || 0,"education_start_month",Number(e.target.value))}
@@ -77,7 +77,7 @@ export const AcademicDateComp = ({
       <div className={`flex w-[335px] items-center pt-2.5 pb-0 px-5 relative ${className}`}>
         <div className="flex w-[100px] gap-1 self-stretch items-center relative">
           <select 
-            className="w-full h-[38px] bg-transparent text-left text-sm border rounded border-[#cccccc]" 
+            className="w-full h-[38px] bg-transparent text-left text-sm border rounded  border-[#cccccc]" 
             name="education_end_year" 
             defaultValue={formData?.education_end_year || ""} 
             onChange={(e) => handleChange(formData?.order_num || 0,"education_end_year",Number(e.target.value))} 
@@ -95,7 +95,7 @@ export const AcademicDateComp = ({
         </div>
 
         <select 
-          className="w-[70px] h-[38px] border rounded border-[#cccccc]" 
+          className="w-[70px] h-[38px] border rounded bg-transparent  border-[#cccccc]" 
           name="education_end_month" 
           defaultValue={formData?.education_end_month || ""} 
           onChange={(e) => handleChange(formData?.order_num || 0,"education_end_month",Number(e.target.value))}
@@ -117,7 +117,7 @@ export const AcademicDateComp = ({
         </div> */}
 
         <select 
-          className="inline-flex w-[70px] h-[38px] mt-0 border rounded border-[#cccccc]" 
+          className="inline-flex w-[70px] h-[38px] mt-0 border rounded bg-transparent border-[#cccccc]" 
           name="education_end_status"
           defaultValue={formData?.education_end_status || ""} 
           onChange={(e) => handleChange(formData?.order_num || 0,"education_end_status",e.target.value)}

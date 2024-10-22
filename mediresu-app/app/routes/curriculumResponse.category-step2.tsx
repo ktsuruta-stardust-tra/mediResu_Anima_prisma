@@ -16,8 +16,8 @@ export default function CategoryWithItemsPage1() {
   }>();
 
   const handleOtherTextChange = (id: number, value: string) => {
-    console.log(`handleOtherTextChange triggered for ID: ${id}, new value: ${value}`);
-    console.log(otherTexts);
+    // console.log(`handleOtherTextChange triggered for ID: ${id}, new value: ${value}`);
+    // console.log(otherTexts);
     setOtherTexts((prev) => ({
       ...prev,
       [id]: value,
@@ -31,8 +31,7 @@ export default function CategoryWithItemsPage1() {
     { stepNumber: "STEP.03", title: "保健診療の", subtitle: "経験", isActive: true },
     { stepNumber: "STEP.04", title: "その他の", subtitle: "スキル", isActive: false },
   ];
-
-
+  
   return (
     <main className="flex flex-col items-center w-full bg-[#d9ecec]">
         <div className="flex w-full max-w-[375px] items-center justify-center gap-1.5 bg-white py-4">

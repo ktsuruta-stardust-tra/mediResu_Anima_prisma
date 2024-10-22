@@ -19,7 +19,7 @@ export default function UserExperiencePage() {
     const jobSummaryHandleInputChange = async (name:string ,value:any) =>{
 
         updateJobSummaryFormData({[name]:value});
-        console.log(jobSummaryFormData)
+        // console.log(jobSummaryFormData)
     }
 
             
@@ -27,7 +27,7 @@ export default function UserExperiencePage() {
     const sillsHandleChange =async (name:string,value:any) => {
 
         updateSkillsExperienceFormData({ [name]:value });
-        console.log(skillsExperienceFormData)
+        // console.log(skillsExperienceFormData)
     }
     
     

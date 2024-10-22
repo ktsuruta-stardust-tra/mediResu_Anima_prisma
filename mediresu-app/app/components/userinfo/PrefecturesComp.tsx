@@ -30,7 +30,7 @@ export const PrefecturesComp = ({
 
         </div> */}
         <select 
-          className="w-[100px] h-[38px] border rounded border-[#cccccc]"
+          className="w-[100px] h-[38px] bg-transparent  border rounded border-[#cccccc]"
           name={name}
           value={value}
           onChange={handleChange}

@@ -1,5 +1,5 @@
 import { json,ActionFunction,redirect } from "@remix-run/node";
-import { useLoaderData, Outlet,Form, useActionData } from "@remix-run/react";
+import { useLoaderData, Outlet,Form, useActionData, useOutletContext } from "@remix-run/react";
 import { UserEducations, UserEmployments,UserLicenses } from "~/types/user";  //型定義のインポート
 import { createInitialUserInfo,createInitialUserEducation,
     createInitialEmployment,createInitialLicense,createInitialUserSelfPr } from "~/types/user";
@@ -18,7 +18,7 @@ import prisma from "~/utils/prismaClient";
 import { Prisma } from "@prisma/client";
 import { upsertFormDataPrisma } from "~/services/upsertFormDataPrisma";
 import { upsertOrderNumPrisma } from "~/services/upsertOrderNumPrisma";
-import { convertToPrismaType } from "~/utils/convertToPrismaType";
+import { sessionStorage} from "~/utils/session";
 // バリデーションエラーデータの型定義
 type ValidationError = {
     [key: string]: string;
@@ -28,8 +28,6 @@ type ActionData = {
     error?: string;
 };
 
-
-const userId = 1;
 export const action:ActionFunction = async ({request}) => {
     const formData = await request.formData();
     const receivedFormData = JSON.parse(formData.get("formData") as string);
@@ -108,8 +106,13 @@ export const action:ActionFunction = async ({request}) => {
 }
 
 
+export const loader = async ({request}) => {
+    const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
-export const loader = async () => {
+    const userId = session.get("userId");
+    // console.log(request)
+    // console.log("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+    // console.log(userId);
 
     try {
         const [userInfo, userEdus, userEmps, userLicenses, userPr] = await Promise.all([
@@ -151,6 +154,8 @@ export const loader = async () => {
 export default function ResumeLayout(){
 
     const {userInfo,userEdus,userEmps,userLicenses,userPr} = useLoaderData<any>();
+    const userId = useOutletContext<any>();
+
     const actionData = useActionData<ActionData>();// actionから返されたデータを受け取る
 
     const initialData = userInfo?.length > 0 ? userInfo[0]:createInitialUserInfo(userId);
@@ -160,9 +165,9 @@ export default function ResumeLayout(){
     const initialEmploymentData = userEmps?.length > 0 ? userEmps:createInitialEmployment(userId);
 
     const [formData,updateFormData]=useUserForm(initialData);
-    // console.log("OOOOOOOOOOO")
-    // console.log(initialData)
-    // console.log(formData);
+    console.log("OOOOOOOOOOO")
+    console.log(initialData)
+    console.log(formData);
   
     //const [educationFormData,updateEducationFormData] = useUserAddedFormManager<Prisma.educationsCreateInput>(
     const [educationFormData,updateEducationFormData] = useUserAddedFormManager<UserEducations>(
@@ -182,6 +187,7 @@ export default function ResumeLayout(){
     )
     const initialSelfPr = userPr?.length >0 ? userPr[0]:createInitialUserSelfPr(userId);
     const [prFormData,updatePrFormData] = useUserForm(initialSelfPr);
+
 
     return(
 <div className="bg-white flex flex-col items-center w-full min-h-screen overflow-y-auto">

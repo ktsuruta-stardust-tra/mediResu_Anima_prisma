@@ -97,9 +97,6 @@ export const loader = async () => {
 };
 
 
-
-
-
 // フロントエンドコンポーネント
 export default function PhotoUploadForm() {
   const actionData = useActionData(); // アクションの結果を取得

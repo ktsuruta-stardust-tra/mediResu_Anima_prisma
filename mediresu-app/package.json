@@ -11,6 +11,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@line/liff": "^2.24.0",
     "@prisma/client": "^5.21.1",
     "@remix-run/node": "^2.12.1",
     "@remix-run/react": "^2.12.1",

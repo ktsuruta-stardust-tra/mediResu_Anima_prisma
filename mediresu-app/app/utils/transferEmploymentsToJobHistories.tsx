@@ -25,16 +25,17 @@ export const syncEmploymentsWithJobHistories = async (userId: number) => {
       if (matchingJobHistory) {
         // 既存のjob_historiesを更新する
         jobHistoriesToUpdate.push({
-          where: { id: matchingJobHistory.id },
-          data: {
+            user_id:employment.user_id,
             company_name: employment.company_name ?? '',
             job_start_year: employment.job_start_year,
             job_start_month: employment.job_start_month,
             job_end_year: employment.job_end_year,
             job_end_month: employment.job_end_month,
             job_start_status:employment.job_start_status,
-            employment_type: "",
-          }
+            order_num:employment.order_num,
+            employment_type:matchingJobHistory.employment_type,
+            job_details:matchingJobHistory.job_details,
+            updated_at: new Date(),
         });
       } else {
         // 存在しないjob_historiesを作成する

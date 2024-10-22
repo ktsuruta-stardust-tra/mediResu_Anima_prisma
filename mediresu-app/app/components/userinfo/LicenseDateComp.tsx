@@ -47,7 +47,7 @@ export const LicenseDateComp = ({
         </div>
        
         <select 
-          className="w-[70px] h-[38px] border rounded border-[#cccccc]" 
+          className="w-[70px] h-[38px] border rounded border-[#cccccc] bg-transparent" 
           name="license_month" 
           defaultValue={formData?.license_month || ""} 
           onChange={(e)=>handleChange(formData?.order_num || 0,"license_month",Number(e.target.value))}

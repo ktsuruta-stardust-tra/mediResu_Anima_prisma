@@ -27,9 +27,6 @@ export default function ResumeLayout(){
     const handleChange =async (e:React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const{name,value} = e.target;
         const updatedValue = name === "birth_year" || name === "birth_month" || name === "birth_day" ? Number(value) : value;
-        //updateFormData({ [name]: name === "birth_year" || name === "birth_month" || name === "birth_day" ? Number(value) : value });
-        // console.log("UUUUUUUUU")
-        // console.log(formData)
         updateFormData({ [name]:updatedValue });
         try{
           await userInfoSchema.validateAt(name, { ...formData, [name]: updatedValue });
@@ -39,20 +36,7 @@ export default function ResumeLayout(){
         }
     }
 
-    const handleImageChange=(e:React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        const name = e.target.name;
-        console.log("PPPPPPPPP")
-        console.log(name)
-        console.log(file)
-        if(file){
-            const reader = new FileReader();
-            reader.onloadend=()=>{
-                updateFormData({[name]:reader.result as string});
-            };
-            reader.readAsDataURL(file);
-        }
-    }
+
     return(
 
         <main className="flex flex-col items-center w-full bg-[#d9ecec]">
@@ -92,7 +76,7 @@ export default function ResumeLayout(){
                     <ItemsComp className="!flex-[0_0_auto]" text="メールアドレス" />
                     <BaseTextComp className="!self-stretch !w-full" text="" value={formData.email_address} name={"email_address"} handleChange={handleChange}/>
                     <ItemsAnyComp className="!flex-[0_0_auto]" text="証明写真" />
-                    <UploadImgComp className="!self-stretch !w-full" formData={formData} handleChange={handleImageChange} />
+                    {/* <UploadImgComp className="!self-stretch !w-full"  /> */}
                     <BackNextComp className="!self-stretch !w-full" img="/img/userinfo/subtract-7.svg" subtract="/img/userinfo/subtract-6.svg" topLink="/top" nextLink="../backgroundhanyo"/>
                 </div>
             </div>

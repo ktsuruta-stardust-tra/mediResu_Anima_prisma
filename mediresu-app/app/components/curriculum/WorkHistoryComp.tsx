@@ -23,7 +23,7 @@ export const WorkHistoryComp = ({
   if(formData?.job_end_year !==0 && formData?.job_end_month !== 0){
     flg = true;
   }
-  console.log(formData);
+  // console.log(formData);
   return (
     <main>
       <div className="flex justify-center items-center max-width">

@@ -31,7 +31,7 @@ export const DateComp = ({
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
   return (
-    <div className={`flex w-[335px] items-center pt-2.5 pb-0 px-5 relative ${className}`}>
+    <div className={`flex w-[335px] items-center pt-2.5 pb-0 px-5 bg-white relative ${className}`}>
       <div className="flex w-[100px] gap-1 self-stretch items-center relative">
         <select className="w-full h-[38px] bg-transparent text-left text-sm border rounded border-[#cccccc]" name={year_name} defaultValue={year} onChange={handleChange}>
           <option value="">年を選択</option>
@@ -50,7 +50,7 @@ export const DateComp = ({
       {/* <img className="relative self-stretch w-[70px]" alt="Frame" src="/img/userinfo/frame-7.svg" /> */}
 
 
-      <select className="w-[70px] h-[38px] border rounded border-[#cccccc]" name={day_name} value={day} onChange={handleChange}>
+      <select className="w-[70px] h-[38px] border rounded bg-transparent border-[#cccccc]" name={month_name} value={month} onChange={handleChange}>
         <option value="">選択</option>
         {months.map((m) => (
           <option key={m} value={m}>
@@ -73,7 +73,7 @@ export const DateComp = ({
           backgroundPosition: 'right center',
           backgroundRepeat: 'no-repeat',}}
         > */}
-      <select className="w-[70px] h-[38px] border rounded border-[#cccccc]" name={day_name} value={day} onChange={handleChange}>
+      <select className="w-[70px] h-[38px] border rounded bg-transparent border-[#cccccc]" name={day_name} value={day} onChange={handleChange}>
         <option value="">選択</option>
         {days.map((d) => (
           <option key={d} value={d}>

@@ -5,9 +5,13 @@ Please share your feedback here: https://form.asana.com/?k=uvp-HPgd3_hyoXRBw1IcN
 
 import React from "react";
 import { UserEmployments } from "~/types/user";
+import { UserJobHistoryType } from "~/types/curriculumDatas";
+import { Prisma } from "@prisma/client";
+import prisma from "~/utils/prismaClient";
+type jobHistoryType = Prisma.PromiseReturnType<typeof prisma.job_histories.findMany>[0];
 interface Props {
   className: any;
-  formData?:any;
+  formData:jobHistoryType;
   handleChange: (order_num:number,field:keyof any,value:number|string) => void;
 }
 
@@ -15,7 +19,6 @@ export const WHEmpTypeComp = ({
   formData,
   handleChange,
  }: Props): JSX.Element => {
-
   return (
     <main>
        <select 

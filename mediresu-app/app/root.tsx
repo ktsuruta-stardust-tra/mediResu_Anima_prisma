@@ -6,6 +6,12 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
+import { useState,useEffect } from "react";
+import { sendProfileToServer,getProfile } from "./utils/liff";
+import liff from "@line/liff";
+import { json } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+
 
 import "./tailwind.css";
 
@@ -21,6 +27,13 @@ export const links: LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
 ];
+
+export let loader = async () => {
+  // 必要なデータを取得したり、何か処理を行う
+  return json({ liffId: process.env.LIFF_ID,  });
+};
+
+
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -41,5 +54,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+
+  const [userId, setUserId] = useState(null);
+  const [saveStatus, setSaveStatus] = useState(null); 
+  const {liffId} = useLoaderData();
+  
+  useEffect(() => {
+    liff.init({ liffId}).then(() => {
+      if (liff.isLoggedIn()) {
+        getProfile().then(profile => {
+          sendProfileToServer(profile).then(result => {
+            setSaveStatus(result.success ? "保存成功" : "保存失敗");
+
+            if(result.success && result.userId){
+              setUserId(result.userId);
+            }
+          });
+        });
+      } else {
+        liff.login();
+      }
+    });
+  }, []);
+
+
+  return <Outlet context={userId}/>;
 }

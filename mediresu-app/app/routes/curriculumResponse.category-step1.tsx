@@ -16,8 +16,8 @@ export default function CategoryWithItemsPage1() {
   }>();
 
   const handleOtherTextChange = (id: number, value: string) => {
-    console.log(`handleOtherTextChange triggered for ID: ${id}, new value: ${value}`);
-    console.log(otherTexts);
+    // console.log(`handleOtherTextChange triggered for ID: ${id}, new value: ${value}`);
+    // console.log(otherTexts);
     setOtherTexts((prev) => ({
       ...prev,
       [id]: value,

@@ -18,8 +18,8 @@ export const upsertUserBasicInfomation = async (jsonData:any,tableName:string) =
         }
         else{
 
-            console.log("insert",tableName)
-            console.log(jsonData)
+            // console.log("insert",tableName)
+            // console.log(jsonData)
 
             delete jsonData.id;
             if("create_at" in jsonData)delete jsonData.create_at;
@@ -46,8 +46,8 @@ export const upsertUserBasicInfomation = async (jsonData:any,tableName:string) =
 export const upsertUserBackgroundData = async (jsonDatas:any[],tableName:string) =>{
     let errors =[]
     for(const jsonData of jsonDatas){
-        console.log("upsert")
-        console.log(jsonData)
+        // console.log("upsert")
+        // console.log(jsonData)
         const result = upsertUserBasicInfomation(jsonData,tableName);
         if(!result){
             return result;

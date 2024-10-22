@@ -61,7 +61,7 @@ export default function ResumeLayout(){
     };
 
     const prHandleChange =async (name:string,value:any) => {
-      console.log(prFormData)
+      // console.log(prFormData)
       updatePrFormData({ [name]:value });
 
   }

@@ -23,9 +23,8 @@ export const ExperienceChecklistSection = ({
 
 return (
 <div className="w-[335px] items-start flex flex-col relative flex-[0_0_auto]">
-  <div className="flex flex-col w-[295px] items-start gap-3 px-5 py-[5px] relative flex-[0_0_auto] bg-white  rounded-md">
-    <div className=" w-full items-center relative">
-      <label className="inline-flex items-center cursor-pointer gap-3">
+  <div className="flex flex-col w-[295px] items-start gap-2 px-5 py-[5px] relative flex-[0_0_auto] bg-white  rounded-md">
+      <label className="inline-flex items-center cursor-pointer gap-2">
         <input 
           type="checkbox" 
           className="hidden peer w-[30px] h-[30px]" // チェックボックスのサイズを固定
@@ -33,13 +32,12 @@ return (
           checked={checked}
           onChange={(e) => handleChange(e.target.name, e.target.checked)} 
         />
-        <div className="peer-checked:hidden w-[30px] h-[30px] bg-white rounded border border-solid border-[#24b6ae] flex-shrink-0" />
-        <div className="peer-checked:flex hidden w-[30px] h-[30px] bg-[#24b6ae] rounded border border-solid border-[#24b6ae] items-center justify-center transition-all duration-300 flex-shrink-0">
+        <div className="peer-checked:hidden relative w-[30px] h-[30px]  bg-white rounded border border-solid border-[#24b6ae] flex-shrink-0 " />
+        <div className="relative w-[30px] h-[30px] bg-[#24b6ae] rounded border border-solid border-[#24b6ae] hidden peer-checked:flex items-center justify-center transition-all duration-300 flex-shrink-0 ">
           <img src="/img/userinfo/vector-1.svg" alt="check icon" className="w-[20px] h-[20px]" />
         </div>
         <span className="ml-2 font-bold text-gray-700 leading-tight flex items-center">{title}</span>
       </label>
-    </div>
 
   </div>
   {title === "その他" && (
