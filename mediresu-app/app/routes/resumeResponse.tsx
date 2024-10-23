@@ -165,9 +165,9 @@ export default function ResumeLayout(){
     const initialEmploymentData = userEmps?.length > 0 ? userEmps:createInitialEmployment(userId);
 
     const [formData,updateFormData]=useUserForm(initialData);
-    console.log("OOOOOOOOOOO")
-    console.log(initialData)
-    console.log(formData);
+    // console.log("OOOOOOOOOOO")
+    // console.log(initialData)
+    // console.log(formData);
   
     //const [educationFormData,updateEducationFormData] = useUserAddedFormManager<Prisma.educationsCreateInput>(
     const [educationFormData,updateEducationFormData] = useUserAddedFormManager<UserEducations>(

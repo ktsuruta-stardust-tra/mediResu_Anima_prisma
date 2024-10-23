@@ -12,6 +12,9 @@ import { PrefecturesComp } from "~/components/userinfo/PrefecturesComp";
 import { BaseTextComp } from "~/components/userinfo/BaseTextComp";
 import { UploadImgComp } from "~/components/userinfo/UploadImgComp";
 import { BackNextComp } from "~/components/userinfo/BackNextComp";
+import { CheckedBackNextComp } from "~/components/userinfo/CheckedBackNextComp";
+import { userInformationsSchema,customErrorMap } from "~/utils/zodSchemas";
+import { z } from "zod";
 
 type OutletContextType = {
     formData: UserInfo;
@@ -23,28 +26,63 @@ export default function ResumeLayout(){
     const {formData,updateFormData} = useOutletContext<OutletContextType>();
     
     const [errors,setErrors] = useState<{[key:string]:string}>({});
-
-    const handleChange =async (e:React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const{name,value} = e.target;
+    const [isFormValid, setIsFormValid] = useState(false); // フォームの有効性を管理
+    // フィールド変更時の処理
+    const handleChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
         const updatedValue = name === "birth_year" || name === "birth_month" || name === "birth_day" ? Number(value) : value;
-        //updateFormData({ [name]: name === "birth_year" || name === "birth_month" || name === "birth_day" ? Number(value) : value });
-        // console.log("UUUUUUUUU")
-        // console.log(formData)
-        updateFormData({ [name]:updatedValue });
-        try{
-          await userInfoSchema.validateAt(name, { ...formData, [name]: updatedValue });
-          setErrors((prev) => ({...prev,[name]:""}));
-        }catch(validationError:any){
-          setErrors((prev) => ({ ...prev, [name]: validationError.message })); // エラーメッセージを設定
+
+        updateFormData({ [name]: updatedValue });
+
+        console.log("KKKK")
+        console.log(errors)
+    };
+
+
+          // formDataの変更を監視し、変更があったときにバリデーションを実行
+    useEffect(() => {
+        validateForm();
+        }, [formData]);  // formDataが変更されたときにバリデーションを実行
+        // フォームのバリデーションを行う関数
+        const validateForm = async () => {
+            try {
+            await userInformationsSchema.parseAsync(formData);  // 最新のformDataをバリデーション
+            setErrors({});
+            setIsFormValid(true);  // バリデーション成功時にtrue
+            } catch (error) {
+            if (error instanceof z.ZodError) {
+                const newErrors: any = {};
+                error.errors.forEach((err) => {
+                const fieldName = err.path[0] as keyof FormData;
+                newErrors[fieldName] = err.message;
+                });
+                setErrors(newErrors);  // バリデーションエラーの設定
+            }
+            setIsFormValid(false);  // バリデーション失敗時にfalse
         }
-    }
+    };
+
+    // // フォーム全体の有効性をチェックする関数
+    // const checkFormValidity = async () => {
+    //     try {
+    //     await userInformationsSchema.parseAsync(formData);  // スキーマで全フィールドをバリデーション
+    //     setErrors({});
+    //     setIsFormValid(true);  // フォームが有効であることを設定
+    //     } catch (error) {
+    //     if (error instanceof z.ZodError) {
+    //         const newErrors:any = {};
+    //         error.errors.forEach((err) => {
+    //         newErrors[err.path[0]] = err.message;
+    //         });
+    //         setErrors(newErrors);  // エラーメッセージを設定
+    //     }
+    //     setIsFormValid(false);  // フォームが無効であることを設定
+    //     }
+    // };
 
     const handleImageChange=(e:React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         const name = e.target.name;
-        console.log("PPPPPPPPP")
-        console.log(name)
-        console.log(file)
         if(file){
             const reader = new FileReader();
             reader.onloadend=()=>{
@@ -76,24 +114,48 @@ export default function ResumeLayout(){
                     <TitleComp className="!self-stretch !w-full" text="基本情報" />
                     <ItemsComp className="!flex-[0_0_auto]" />
                     <NameComp className="!self-stretch !w-full" lastValue={formData.last_name} firstValue={formData.first_name} lastName="last_name" firstName="first_name" handleChange={handleChange} />
+                    {errors.last_name && <p className="ml-5" style={{ color: "red" }}>{errors.last_name}</p>}
+                    {errors.first_name && <p className="ml-5" style={{ color: "red" }}>{errors.first_name}</p>} 
+
                     <NameComp className="!self-stretch !w-full" text="セイ" text1="ヤマダ" text2="メイ" text3="タロウ" lastValue={formData.last_name_kana} firstValue={formData.first_name_kana} lastName="last_name_kana" firstName="first_name_kana" handleChange={handleChange}/>
+                    {errors.last_name_kana && <p className="ml-5" style={{ color: "red" }}>{errors.last_name_kana}</p>}
+                    {errors.first_name_kana && <p className="ml-5" style={{ color: "red" }}>{errors.first_name_kana}</p>} 
+
                     <ItemsComp className="!flex-[0_0_auto]" text="生年月日" />
                     <DateComp className="!self-stretch !w-full" year={formData.birth_year} year_name="birth_year" month={formData.birth_month} month_name="birth_month" day={formData.birth_day} day_name="birth_day" handleChange={handleChange}/>
+                    {errors.birth_year && <p className="ml-5" style={{ color: "red" }}>{errors.birth_year}</p>}
+                    {errors.birth_month && <p className="ml-5" style={{ color: "red" }}>{errors.birth_month}</p>} 
+                    {errors.birth_day && <p className="ml-5" style={{ color: "red" }}>{errors.birth_day}</p>} 
+                    
                     <ItemsComp className="!flex-[0_0_auto]" text="郵便番号" />
                     <PostCodeComp className="!self-stretch !w-full" value={formData.postal_code} name="postal_code" handleChange={handleChange}/>
+                    {errors.postal_code && <p style={{ color: "red" }}>{errors.postal_code}</p>} 
+
                     <ItemsComp className="!flex-[0_0_auto]" text="都道府県" />
                     <PrefecturesComp className="!self-stretch !w-full" value={formData.prefecture} name="prefecture" handleChange={handleChange}/>
+                    {errors.prefecture && <p className="ml-5" style={{ color: "red" }}>{errors.prefecture}</p>} 
+
                     <ItemsComp className="!flex-[0_0_auto]" text="市区町村" />
                     <BaseTextComp className="!self-stretch !w-full" value={formData.city} name={"city"} handleChange={handleChange} />
+                    {errors.city && <p className="ml-5" style={{ color: "red" }}>{errors.city}</p>} 
+
                     <ItemsComp className="!flex-[0_0_auto]" text="番地・建物名" />
                     <BaseTextComp className="!self-stretch !w-full" text="〇番地 00-00-00" value={formData.address} name={"address"} handleChange={handleChange} />
+                    {errors.address && <p className="ml-5" style={{ color: "red" }}>{errors.address}</p>} 
+
                     <ItemsComp className="!flex-[0_0_auto]" text="電話番号" />
                     <BaseTextComp className="!self-stretch !w-full" text="" value={formData.phone_number} name={"phone_number"} handleChange={handleChange}/>
+                    {errors.phone_number && <p className="ml-5" style={{ color: "red" }}>{errors.phone_number}</p>} 
+
                     <ItemsComp className="!flex-[0_0_auto]" text="メールアドレス" />
                     <BaseTextComp className="!self-stretch !w-full" text="" value={formData.email_address} name={"email_address"} handleChange={handleChange}/>
+                    {errors.email_address && <p className="ml-5" style={{ color: "red" }}>{errors.email_address}</p>} 
+
                     <ItemsAnyComp className="!flex-[0_0_auto]" text="証明写真" />
                     <UploadImgComp className="!self-stretch !w-full" formData={formData} handleChange={handleImageChange} />
-                    <BackNextComp className="!self-stretch !w-full" img="/img/userinfo/subtract-7.svg" subtract="/img/userinfo/subtract-6.svg" topLink="/top" nextLink="../backgroundhanyo"/>
+
+                    <CheckedBackNextComp className="!self-stretch !w-full" img="/img/userinfo/subtract-7.svg" subtract="/img/userinfo/subtract-6.svg" topLink="/top" nextLink="../backgroundhanyo" isValid={isFormValid}/>
+
                 </div>
             </div>
         </main>

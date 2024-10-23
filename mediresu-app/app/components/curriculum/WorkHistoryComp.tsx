@@ -27,7 +27,7 @@ export const WorkHistoryComp = ({
   return (
     <main>
       <div className="flex justify-center items-center max-width">
-        <div className="flex  ml-5  mt-7 items-center gap-2.5 p-4 relative bg-[#d9ecec] rounded">
+        <div className="flex  ml-1  mt-7 items-center gap-2.5 p-4 relative bg-[#d9ecec] rounded">
           <div className=" w-[265px] [font-family:'Inter-Medium',Helvetica] font-medium text-black text-base ">
             {formData?.company_name}
             <br />
