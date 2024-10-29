@@ -5,6 +5,8 @@ import { StepProgress } from "~/components/curriculum/StepsComp";
 import { SubItemsComp } from "~/components/userinfo/SubItemsComp";
 import { ItemsAnyComp } from "~/components/userinfo/ItemsAnyComp";
 import { BackEndComp } from "~/components/userinfo/BackEndComp";
+import { ChecklistSectionAccordion } from "~/components/curriculum/ChecklistSectionAccordion";
+import { BackAndNextComp } from "~/components/curriculum/BackAndNextComp";
 
 export default function CategoryWithItemsPage1() {
   const { categories, selectedItems, handleCheckboxChange, setOtherTexts, otherTexts } = useOutletContext<{
@@ -49,7 +51,7 @@ export default function CategoryWithItemsPage1() {
                 />
                 {categories.filter(category=> category.id <= 4).map((category) => (
                     <div key={category.id}>
-                        <ChecklistSection 
+                        <ChecklistSectionAccordion 
                           key={category.id} 
                           title={category.name} 
                           itemCount={category.operations.length} 
@@ -62,7 +64,13 @@ export default function CategoryWithItemsPage1() {
                     </div>
                 ))}
 
-                <BackEndComp className="w-full" img="/img/userinfo/subtract-1.svg" subtract="/img/userinfo/subtract-6.svg" text="次へ" backLink="../job-summary" nextLink="../category-step2" />
+                <BackAndNextComp 
+                  className="w-full" 
+                  img="/img/userinfo/subtract-1.svg" 
+                  subtract="/img/userinfo/subtract-6.svg" 
+                  backLink="../job-summary" 
+                  nextLink="../category-step2"
+                />
             </div>
         </div>
     </main>

@@ -1,16 +1,11 @@
 // ParentForm.tsx
 import { Outlet,Form,useLoaderData, useOutletContext } from '@remix-run/react';
-import { useState } from 'react';
-import { supabase } from '~/utils/supabaseClient';
+import { useEffect, useState,useRef } from 'react';
 import { ActionFunction } from '@remix-run/node';
-import { deleteUserData,insertUserOperations,insertSupplementaryTexts } from '~/services/delsertOperationData';
 import { redirect } from '@remix-run/react';
 import { UserExperienceType,createDefaultUserExperience, createDefaultUserJobHistory, createInitialUserJobHistory } from '~/types/curriculumDatas';
 import { useExperienceItems } from '~/hooks/useExperienceItems';
-import { upsertUserExperienceData } from '~/services/upsertUserExperienceData';
 import { useUserAddedFormManager } from '~/hooks/useUserAddInfo';
-import { upsertOrderNum } from '~/services/upsertOrderNum';
-import { upsertFormData } from '~/services/upsertFormData';
 import { createDefaultUserJobSummary,createInitialUserJobSummary } from '~/types/curriculumDatas';
 import { createInitialSkillExperience } from '~/types/curriculumDatas';
 import { useUserForm } from '~/hooks/useUserForm';
@@ -23,97 +18,102 @@ import { upsertOrderNumPrisma } from '~/services/upsertOrderNumPrisma';
 import { syncEmploymentsWithJobHistories } from '~/utils/transferEmploymentsToJobHistories';
 import { sessionStorage } from '~/utils/session';
 
-
 export const loader = async ({request}) => {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
+
   const userId = session.get("userId");
-  if(userId)
-    try {
-      const [
-        categories,
-        initialSelectedIdsObj,
-        otherInitialDataObj,
-        tempUserExperienceFormData,
-        tempUserJobHistory,
-        tempUserJobSummary,
-        tempSkills,
-      ] = await Promise.all([
 
-        // categoriesのデータ取得
-        prisma.categories.findMany({
-          include: {
-            operations: true, // リレーションされたoperationsを含めて取得
-          },
-        }),
-  
-        // user_operationsのデータ取得
-        prisma.user_operations.findMany({
-          where: { user_id: userId },
-          select: { operation_id: true },
-        }),
-  
-        // supplementary_textsのデータ取得
-        prisma.supplementary_texts.findMany({
-          where: { user_id: userId },
-          select: {
-            operation_id: true,
-            input_text: true,
-          },
-        }),
-  
-        // user_experiencesのデータ取得
-        prisma.user_experiences.findMany({
-          where: { user_id: userId },
-        }),
-  
-        //job_history
-        syncEmploymentsWithJobHistories(userId),
-        
+  if (!userId) {
+    return new Response("User not authenticated", { status: 401 });
+  }
 
-        // job_summariesのデータ取得
-        prisma.job_summaries.findMany({
-          where: { user_id: userId },
-        }),
-  
-        // skills_experiencesのデータ取得
-        prisma.skills_experiences.findMany({
-          where: { user_id: userId },
-        }),
+  try {
+    const [
+      categories,
+      initialSelectedIdsObj,
+      otherInitialDataObj,
+      tempUserExperienceFormData,
+      tempUserJobHistory,
+      tempUserJobSummary,
+      tempSkills,
+    ] = await Promise.all([
 
-      ]);
-  
-      // user_operationsの処理
-      let initialSelectedIds = [];
-      if (initialSelectedIdsObj) {
-        initialSelectedIds = initialSelectedIdsObj.map((item) => item.operation_id);
-      }
-  
-      // supplementary_textsの処理
-      type SupplementaryText = Prisma.PromiseReturnType<typeof prisma.supplementary_texts.findMany>[0];
-      const otherInitialData = otherInitialDataObj?.reduce((acc, item: SupplementaryText) => {
-        if (item.operation_id !== null) {
-          acc[item.operation_id] = item.input_text;
-        }
-        return acc;
-      }, {} as Record<number, string>);
-  
-      return {
-        categories,
-        initialSelectedIds,
-        otherInitialData,
-        tempUserExperienceFormData,
-        tempUserJobHistory,
-        tempUserJobSummary,
-        tempSkills,
-      };
-    } catch (err) {
-      console.error("Error loading data:", err);
-      throw new Response("Error loading data", { status: 500 });
+      // categoriesのデータ取得
+      prisma.categories.findMany({
+        include: {
+          operations: true, // リレーションされたoperationsを含めて取得
+        },
+      }),
+
+      // user_operationsのデータ取得
+      prisma.user_operations.findMany({
+        where: { user_id: userId },
+        select: { operation_id: true },
+      }),
+
+      // supplementary_textsのデータ取得
+      prisma.supplementary_texts.findMany({
+        where: { user_id: userId },
+        select: {
+          operation_id: true,
+          input_text: true,
+        },
+      }),
+
+      // user_experiencesのデータ取得
+      prisma.user_experiences.findMany({
+        where: { user_id: userId },
+      }),
+
+      //job_history
+      syncEmploymentsWithJobHistories(userId),
+      
+
+      // job_summariesのデータ取得
+      prisma.job_summaries.findMany({
+        where: { user_id: userId },
+      }),
+
+      // skills_experiencesのデータ取得
+      prisma.skills_experiences.findMany({
+        where: { user_id: userId },
+      }),
+
+    ]);
+
+    // user_operationsの処理
+    let initialSelectedIds = [];
+    if (initialSelectedIdsObj) {
+      initialSelectedIds = initialSelectedIdsObj.map((item) => item.operation_id);
     }
-  };
+
+    // supplementary_textsの処理
+    type SupplementaryText = Prisma.PromiseReturnType<typeof prisma.supplementary_texts.findMany>[0];
+    const otherInitialData = otherInitialDataObj?.reduce((acc, item: SupplementaryText) => {
+      if (item.operation_id !== null) {
+        acc[item.operation_id] = item.input_text;
+      }
+      return acc;
+    }, {} as Record<number, string>);
+
+    return {
+      categories,
+      initialSelectedIds,
+      otherInitialData,
+      tempUserExperienceFormData,
+      tempUserJobHistory,
+      tempUserJobSummary,
+      tempSkills,
+    };
+  } catch (err) {
+    console.error("Error loading data:", err);
+    throw new Response("Error loading data", { status: 500 });
+  }
+};
   
 
 export const action:ActionFunction = async ({request}) => {
+
     const formData = await request.formData();
     const selectedItems = formData.get("selectedItems") as string;
     const otherTexts = JSON.parse(formData.get("otherTexts") as string);
@@ -122,12 +122,14 @@ export const action:ActionFunction = async ({request}) => {
     const jobSummaryFormData = JSON.parse(formData.get("jobSummaryFormData") as string);
     const itemIds = selectedItems ? selectedItems.split(',').map(Number) : [];
     const skillsFormData = JSON.parse(formData.get("skillsFormData") as string);
-    const {userId} = useOutletContext<any>();
+    
+    const session = await sessionStorage.getSession(request.headers.get("Cookie"));
+    const userId = session.get("userId");
     let result = await deleteUserDataPrisma(userId, "user_operations");
     
     if (result.status === "error") {
         
-        return new Response(result.message, { status: 500 })
+      return new Response(result.message, { status: 500 })
 
     }
 
@@ -162,8 +164,8 @@ export const action:ActionFunction = async ({request}) => {
         jobHistoryFormDatas.map((jobHistoryFormData:any) => 
             upsertOrderNumPrisma(jobHistoryFormData, "job_histories")
         )
-        
     );
+
     // 全てのupsertOrderNumを並行して実行
     await upsertFormDataPrisma(jobSummaryFormData,"job_summaries");
 
@@ -173,6 +175,7 @@ export const action:ActionFunction = async ({request}) => {
 }
 
 export default function ParentForm() {
+
     const {categories,initialSelectedIds,
         otherInitialData,tempUserExperienceFormData,
         tempUserJobHistory,tempUserJobSummary,tempSkills
@@ -186,7 +189,7 @@ export default function ParentForm() {
         .filter((operation:any) => operation.name === 'その他')
         .map((operation:any) => operation.id)
     );
-
+  
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set(initialSelectedIds));
 
     // 「その他」のテキスト入力内容を保持する状態
@@ -196,15 +199,37 @@ export default function ParentForm() {
     const [experienceFormData,updateExperienceFormData] = useExperienceItems<any>(initialExperienceFormData);
 
     type jobHistoryType = Prisma.PromiseReturnType<typeof prisma.job_histories.findMany>[0]
+
     const initialJobHistoryFormData = tempUserJobHistory;
 
-    const [jobHistoryFormData,updateJobHistoryFormData] = useUserAddedFormManager<any>(initialJobHistoryFormData,createDefaultUserJobHistory(userId));
 
+    const [jobHistoryFormData,updateJobHistoryFormData] = useUserAddedFormManager<any>(initialJobHistoryFormData,createDefaultUserJobHistory(userId));
+    
+    
     const initialJobSummaryFormData = tempUserJobSummary?.length > 0 ? tempUserJobSummary[0]:createInitialUserJobSummary(userId);
+
     const [jobSummaryFormData,updateJobSummaryFormData] = useUserForm(initialJobSummaryFormData);
 
     const initialSkillsExperience = tempSkills?.length > 0 ? tempSkills[0]:createInitialSkillExperience(userId);
     const [skillsExperienceFormData,updateSkillsExperienceFormData] = useUserForm(initialSkillsExperience);
+
+    useEffect(()=>{
+      if(userId){
+        // userId がある場合に状態を更新
+        updateExperienceFormData(
+          tempUserExperienceFormData?.length > 0 ? tempUserExperienceFormData[0] : createDefaultUserExperience(userId)
+        );
+
+        updateJobSummaryFormData(
+          tempUserJobSummary?.length > 0 ? tempUserJobSummary[0] : createInitialUserJobSummary(userId)
+        );
+        updateSkillsExperienceFormData(
+          tempSkills?.length > 0 ? tempSkills[0] : createInitialSkillExperience(userId)
+        );
+
+      }
+    },[userId])
+
 
     const handleCheckboxChange = (id: number) => {
         setSelectedItems((prevSelectedItems) => {
@@ -235,6 +260,24 @@ export default function ParentForm() {
         });
     };
 
+    //1，2ページのバリデーション判定(フロント)
+    const [page1IsValid, setPage1IsValid] = useState(false);
+    const [page4IsValid, setPage4IsValid] = useState(false);
+    const [isMainFormValid, setIsFormValid] = useState(false);
+
+    useEffect(()=>{
+      setIsFormValid(page1IsValid && page4IsValid);
+    },[page1IsValid,page4IsValid]);
+
+    const saveButtonRef = useRef<HTMLButtonElement>(null);
+    const triggerSave = () => {
+        if(saveButtonRef.current){
+            saveButtonRef.current.click();
+        }
+    }
+
+
+
     return (
         <div className="bg-white flex flex-col items-center w-full min-h-screen overflow-y-auto">
             <div className="bg-white w-full max-w-[375px]">
@@ -249,6 +292,9 @@ export default function ParentForm() {
                     jobHistoryFormData,updateJobHistoryFormData,
                     jobSummaryFormData,updateJobSummaryFormData,
                     skillsExperienceFormData,updateSkillsExperienceFormData,
+                    page1IsValid,setPage1IsValid,
+                    page4IsValid,setPage4IsValid,
+                    triggerSave,isMainFormValid,
                 }} />
 
                 {/* フッター */}
@@ -262,9 +308,24 @@ export default function ParentForm() {
                             <input type="hidden" name="jobHistoryFormData" value={JSON.stringify(jobHistoryFormData)} />
                             <input type="hidden" name="jobSummaryFormData" value={JSON.stringify(jobSummaryFormData)} />
                             <input type="hidden" name="skillsFormData" value={JSON.stringify(skillsExperienceFormData)} />
-                            <button className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
-                                保存する
-                            </button>
+                            
+                            {!isMainFormValid?(
+                              <button 
+                                  className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm"
+                                  disabled={!isMainFormValid}>
+                                  保存する
+                              </button>
+
+                            ):(
+                                <button 
+                                    type="submit"
+                                    ref={saveButtonRef}
+                                    className="w-[110px] h-10 bg-[#24b6ae] rounded-[20px] font-bold text-white text-sm">
+                                    保存する
+                                </button>
+
+                            )}
+
                             <button className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
                                 プレビュー
                             </button>

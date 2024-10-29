@@ -36,12 +36,3 @@ export const BackEndComp = ({
     </div>
   );
 };
-
-// BackEndComp.propTypes = {
-//   className: PropTypes.string,
-//   subtract: PropTypes.string,
-//   text: PropTypes.string,
-//   img: PropTypes.string,
-//   topLink: PropTypes.string.isRequired,
-//   nextLink: PropTypes.string.isRequired,
-// };

@@ -7,30 +7,86 @@ import { ItemsComp } from "~/components/userinfo/ItemsComp";
 import { ItemsAnyComp } from "~/components/userinfo/ItemsAnyComp";
 import { LongTextComp } from "~/components/curriculum/LongTextComp";
 import { BackNextComp } from "~/components/userinfo/BackNextComp";
+import { useState } from "react";
+import { jobSummariesSchema } from "~/utils/zodSchemas";
+import { useEffect } from "react";
+import { z } from "zod";
+import { CheckedBackNextComp } from "~/components/userinfo/CheckedBackNextComp";
+import { skillsExperiencesSchema } from "~/utils/zodSchemas";
+
 export default function UserExperiencePage() {
 
-    const { jobSummaryFormData,updateJobSummaryFormData,skillsExperienceFormData,updateSkillsExperienceFormData } = useOutletContext<{
+    const { 
+        jobSummaryFormData,
+        updateJobSummaryFormData,
+        skillsExperienceFormData,
+        updateSkillsExperienceFormData,
+        setPage1IsValid,
+     } = useOutletContext<{
         jobSummaryFormData:UserJobSummaryType;
         updateJobSummaryFormData:(newData:Partial<UserSillsExperiencesType>) => void;
         skillsExperienceFormData:UserSillsExperiencesType;
         updateSkillsExperienceFormData:(newData:Partial<UserSillsExperiencesType>) => void;
+        setPage1IsValid:(isValid:boolean)=>void;
     }>();
-  
+
+    const [isFormValid,setIsFormValid] = useState(false);
+    const [error, setError] = useState<string>(); 
+    const [skillError,setSkillError]=useState<string>();
+
     const jobSummaryHandleInputChange = async (name:string ,value:any) =>{
 
         updateJobSummaryFormData({[name]:value});
-        // console.log(jobSummaryFormData)
+        
     }
-
-            
 
     const sillsHandleChange =async (name:string,value:any) => {
 
         updateSkillsExperienceFormData({ [name]:value });
         // console.log(skillsExperienceFormData)
     }
-    
-    
+
+    useEffect(() => {
+        try {
+          // バリデーションを実行
+          jobSummariesSchema.parse(jobSummaryFormData);
+          setError(""); // エラーメッセージをクリア
+        } catch (validationError) {
+          // バリデーションエラーの場合
+          if (validationError instanceof z.ZodError) {
+            setError(validationError.errors[0].message); // 最初のエラーメッセージを表示
+          }
+        }
+        
+    }, [jobSummaryFormData]); // jobSummaryFormDataが変更されたときに実行
+
+    useEffect(() => {
+        try {
+          // バリデーションを実行
+          skillsExperiencesSchema.parse(skillsExperienceFormData);
+          setSkillError(""); // エラーメッセージをクリア
+        } catch (validationError) {
+          // バリデーションエラーの場合
+          if (validationError instanceof z.ZodError) {
+            setSkillError(validationError.errors[0].message); // 最初のエラーメッセージを表示
+          }
+        }
+        
+    }, [skillsExperienceFormData]); // jobSummaryFormDataが変更されたときに実行
+
+    useEffect(() => {
+        const noExperienceErrors = error?.length === 0;
+        const noJobHistoryErrors = skillError?.length === 0;
+        setIsFormValid(noExperienceErrors && noJobHistoryErrors);
+
+    });
+
+    useEffect(() => {
+        setPage1IsValid(isFormValid);
+
+    },[isFormValid,setPage1IsValid])
+
+
     return(
         <main className="flex flex-col items-center w-full bg-[#d9ecec]">
             <div className="flex w-full max-w-[375px] items-center justify-center gap-1.5 bg-white py-4">
@@ -79,6 +135,9 @@ export default function UserExperiencePage() {
                 <div className="flex flex-col items-start px-0 py-[30px] w-full bg-white rounded-md">
                     <TitleComp className="w-full" text="職務要約" />
                     <ItemsComp text="職務要約(500文字以内)" />
+                    {error && <p className="ml-5" style={{ color: "red" }}>{error}</p>
+                    
+                    }
                     <LongTextComp
                         className="!self-stretch !h-[150px] !w-full"
                         divClassName="!mt-[unset]"
@@ -89,8 +148,10 @@ export default function UserExperiencePage() {
                         value={jobSummaryFormData.summary}
                         handleChange={jobSummaryHandleInputChange}
                     />
+                    
                     <TitleComp className="w-full pt-10" text="活かせる経験・知識・技術" />
                     <ItemsAnyComp text="得意分野(500文字以内)" />
+                    {skillError && <p className="ml-5" style={{ color: "red" }}>{skillError}</p>}
                     <LongTextComp
                         className="!self-stretch !h-[150px] !w-full"
                         divClassName="!mt-[unset]"
@@ -101,12 +162,13 @@ export default function UserExperiencePage() {
                         value={skillsExperienceFormData.skills}
                         handleChange={sillsHandleChange}
                     />
-                    <BackNextComp
+                    <CheckedBackNextComp
                         className="!self-stretch !flex-[0_0_auto] !w-full"
                         img="/img/userinfo/subtract-7.svg"
                         subtract="/img/userinfo/subtract-6.svg"
                         topLink="/top"
                         nextLink="../category-step1"
+                        isValid={isFormValid}
                     />
                 </div>
             </div>

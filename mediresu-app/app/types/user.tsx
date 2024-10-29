@@ -119,7 +119,6 @@ export type UserEmployments = {
 
 export const createInitialEmployment = (user_id:number) :Prisma.employmentsCreateManyInput[]=> {
   return[{
-
     user_id,
     job_start_year:0,
     job_start_month:0,
@@ -127,7 +126,6 @@ export const createInitialEmployment = (user_id:number) :Prisma.employmentsCreat
     job_end_month:0,
     company_name:"",
     order_num:1,
-
   }]
 }
 

@@ -13,18 +13,90 @@ import { LongTextComp } from "~/components/curriculum/LongTextComp";
 import { BackEndComp } from "~/components/userinfo/BackEndComp";
 import { WHEmpTypeComp } from "~/components/curriculum/WHEmpTypeComp";
 import { Prisma } from "@prisma/client";
+import { WorkHistoryLongTextComp } from "~/components/curriculum/WorkHistoryLongTextComp";
 import prisma from "~/utils/prismaClient";
+import { z } from "zod";
+import { useEffect,useState } from "react";
+import { userExperiencesSchema } from "~/utils/zodSchemas";
+import { jobHistoriesSchema } from "~/utils/zodSchemas";
+import { CheckedBackEndComp } from "~/components/userinfo/CheckedBackEndComp";
+
 
 export default function UserExperiencePage() {
 
-    const { experienceFormData,updateExperienceFormData,jobHistoryFormData,updateJobHistoryFormData, } = useOutletContext<{
+    const { 
+        experienceFormData,
+        updateExperienceFormData,
+        jobHistoryFormData,
+        updateJobHistoryFormData,
+        page1IsValid,
+        setPage4IsValid,
+        isMainFormValid,
+        triggerSave,
+    } = useOutletContext<{
         experienceFormData:UserExperienceType,
         updateExperienceFormData:(newData:Partial<UserExperienceType>) => void;
-        jobHistoryFormData:UserJobHistoryType[],
+        c:UserJobHistoryType[],
         updateJobHistoryFormData:(newData:Partial<any> & {order_num:number},orderNumKey: keyof any) => void;
-        
+        page1IsValid:boolean,
+        setPage4IsValid:(isValid:boolean) => void;
+        isMainFormValid:boolean;
+        triggerSave:()=> void;
     }>();
 
+    // バリデーション用の状態
+    const [isFormValid, setIsFormValid] = useState(false);
+    const [experienceFormError, setExperienceFormError] = useState<string>(); 
+    const [jobHistoryFormError, setjobHistoryFormError] = useState<string[][]>([]); 
+
+    useEffect(() =>{
+        console.log(jobHistoryFormData.length,"leng")
+        console.log(jobHistoryFormData)
+        if(jobHistoryFormData.length > 0){
+            if(jobHistoryFormData[0].company_name !== ""){
+                const validateJobHistoryData = () => {
+                    const validationErrors: string[][] = jobHistoryFormData.map((jobHistory) => {
+                        const result = jobHistoriesSchema.safeParse(jobHistory);
+                        if(!result.success){
+                            return result.error.errors.map((err) => err.message);
+                        }
+                        return [];
+                    });
+                    setjobHistoryFormError(validationErrors);
+                };
+                validateJobHistoryData();
+                console.log(jobHistoryFormError)
+            }
+        }
+    },[jobHistoryFormData])
+
+
+    useEffect(() => {
+        try {
+          // バリデーションを実行
+          userExperiencesSchema.parse(experienceFormData);
+          setExperienceFormError(""); // エラーメッセージをクリア
+        } catch (validationError) {
+          // バリデーションエラーの場合
+          if (validationError instanceof z.ZodError) {
+            setExperienceFormError(validationError.errors[0].message); // 最初のエラーメッセージを表示
+          }
+        }
+      }, [updateExperienceFormData]); // updateExperienceFormDataが変更されたときに実行
+
+          // エラーステートを監視して「完了」ボタンの有効/無効を更新
+    useEffect(() => {
+        const noExperienceErrors = experienceFormError?.length === 0;
+        const noJobHistoryErrors = jobHistoryFormError.every((errs) => errs.length === 0);
+        setIsFormValid(noExperienceErrors && noJobHistoryErrors);
+    }, [experienceFormError, jobHistoryFormError]);
+
+  
+    useEffect(()=>{
+        setPage4IsValid(isFormValid);
+    },[isFormValid,setPage4IsValid]);
+
+    //職歴がすでに入力されているか確認
     let isRegistered = false;
     if(jobHistoryFormData.length > 0){
         if(jobHistoryFormData[0].company_name !== ""){
@@ -59,7 +131,12 @@ export default function UserExperiencePage() {
 
         updateJobHistoryFormData({order_num,[field]:value},"order_num")
         
-        };
+    };
+
+    const endHandleChange=async() => {
+        triggerSave();
+    };
+
 
 
     const steps = [
@@ -84,6 +161,7 @@ export default function UserExperiencePage() {
                         divClassName="!h-[unset] !mr-[-1.00px] !tracking-[-0.56px] !leading-[normal] !w-fit"
                         text="ご経験があるものにチェックをつけてください。"
                     />
+                     {experienceFormError && <p className="text-red-500 text-sm">{experienceFormError}</p>} {/* エラーメッセージの表示 */}
                     <ExperienceChecklistSection title="Windows" name="windows" checked={experienceFormData.windows} handleChange={handleChange} otherText={experienceFormData.other_experience} />
                     <ExperienceChecklistSection title="Mac" name="mac" checked={experienceFormData.mac} handleChange={handleChange} otherText={experienceFormData.other_experience} />
                     <ExperienceChecklistSection title="Microsoft Word" name="microsoft_word" checked={experienceFormData.microsoft_word} handleChange={handleChange} otherText={experienceFormData.other_experience} />
@@ -102,9 +180,18 @@ export default function UserExperiencePage() {
                         <div key={index}>
                             <WorkHistoryComp formData={data} />
                             <ItemsComp className="!flex-[0_0_auto]" text="雇用形態"/>
+
+                            {jobHistoryFormError[index] && jobHistoryFormError[index].length >0 && (
+                                <div className="text-red-500">
+                                    {jobHistoryFormError[index].map((error,idx) => (
+                                        <p key={idx}>{error}</p>
+                                    ))}
+                                </div>
+                            )}
+
                             <WHEmpTypeComp formData={data} handleChange={jobHistoryHandleInputChange}/>
                             <ItemsAnyComp className="!flex-[0_0_auto]" text="職務内容（1,000文字以内）"/>
-                            <LongTextComp
+                            <WorkHistoryLongTextComp
                                 name="job_details"
                                 value={data.job_details}
                                 formData={data}
@@ -119,8 +206,20 @@ export default function UserExperiencePage() {
                     <WHEmpTypeComp/>
 
                     <ItemsAnyComp className="!flex-[0_0_auto]" text="職務内容（1,000文字以内）"/> */}
-
+                    {/* {isFormValid && 
                     <BackEndComp className="w-full" img="/img/userinfo/subtract-1.svg" subtract="/img/userinfo/subtract-6.svg" text="完了" backLink="../category-step2" nextLink="/top" />
+                    } */}
+                    <CheckedBackEndComp 
+                        className="w-full" 
+                        img="/img/userinfo/subtract-1.svg" 
+                        subtract="/img/userinfo/subtract-6.svg" 
+                        text="完了" 
+                        backLink="../category-step2"  
+                        nextLink="/top" 
+                        isValid={isMainFormValid}
+                        handleChange={endHandleChange}
+                    />
+                    
                 </div>
             </div>
         </main>

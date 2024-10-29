@@ -13,25 +13,27 @@ interface Props {
   value:string;
   name:string;
   formData:any;
-  handleChange:(field:keyof any,value:number|string) => void;
+  handleChange:(order_num:number,field:keyof any,value:number|string) => void;
 }
 // const handleCheckCount = (value:string) =>{
 //   console.log(value);
 // }
-export const LongTextComp = ({
+export const WorkHistoryLongTextComp = ({
   value,
   name,
   formData,
   handleChange,
 }: Props): JSX.Element => {
+
+  const defaultText = "【役職・所属】\n\n\n【業務内容】\n\n\n【施術経験】"
   return (
-    <div className="flex w-[335px] items-start gap-[15px] pt-2.5 pb-0 px-5 relative !self-stretch !h-[150px]">
+    <div className="flex w-[335px] items-start gap-[15px] pt-2.5 pb-0 px-5 relative !self-stretch !h-[255px]">
       <div className="flex flex-col items-start gap-[5px] relative flex-1 grow !self-stretch">
         <textarea
           className="flex flex-col items-start justify-start text-left px-5 py-3 relative self-stretch w-full bg-white rounded border border-solid border-[#cccccc] !h-[unset] !flex-1 !grow"
-          defaultValue={value}
+          defaultValue={value || defaultText}
           name={name}
-          onChange={(e)=> handleChange(name,e.target.value)}
+          onChange={(e)=> handleChange(formData?.order_num || 0,"job_details",e.target.value)}
         />
 
       </div>

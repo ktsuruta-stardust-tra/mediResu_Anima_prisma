@@ -19,11 +19,15 @@ import { z } from "zod";
 type OutletContextType = {
     formData: UserInfo;
     updateFormData:(newData:Partial<UserInfo>) => void;
+    page1IsValid:boolean;
+    setPage1IsValid:(isValid: boolean) => void;
+    page2IsValid:boolean;
+    setPage2IsValid: (isValid: boolean) => void;
 }
 
 export default function ResumeLayout(){
 
-    const {formData,updateFormData} = useOutletContext<OutletContextType>();
+    const {formData,updateFormData,setPage1IsValid} = useOutletContext<OutletContextType>();
     
     const [errors,setErrors] = useState<{[key:string]:string}>({});
     const [isFormValid, setIsFormValid] = useState(false); // フォームの有効性を管理
@@ -33,23 +37,19 @@ export default function ResumeLayout(){
         const updatedValue = name === "birth_year" || name === "birth_month" || name === "birth_day" ? Number(value) : value;
 
         updateFormData({ [name]: updatedValue });
-
-        console.log("KKKK")
-        console.log(errors)
     };
 
-
-          // formDataの変更を監視し、変更があったときにバリデーションを実行
+    // formDataの変更を監視し、変更があったときにバリデーションを実行
     useEffect(() => {
         validateForm();
         }, [formData]);  // formDataが変更されたときにバリデーションを実行
         // フォームのバリデーションを行う関数
-        const validateForm = async () => {
-            try {
+    const validateForm = async () => {
+        try {
             await userInformationsSchema.parseAsync(formData);  // 最新のformDataをバリデーション
             setErrors({});
             setIsFormValid(true);  // バリデーション成功時にtrue
-            } catch (error) {
+        } catch (error) {
             if (error instanceof z.ZodError) {
                 const newErrors: any = {};
                 error.errors.forEach((err) => {
@@ -59,26 +59,15 @@ export default function ResumeLayout(){
                 setErrors(newErrors);  // バリデーションエラーの設定
             }
             setIsFormValid(false);  // バリデーション失敗時にfalse
+            console.log(errors)
         }
     };
 
-    // // フォーム全体の有効性をチェックする関数
-    // const checkFormValidity = async () => {
-    //     try {
-    //     await userInformationsSchema.parseAsync(formData);  // スキーマで全フィールドをバリデーション
-    //     setErrors({});
-    //     setIsFormValid(true);  // フォームが有効であることを設定
-    //     } catch (error) {
-    //     if (error instanceof z.ZodError) {
-    //         const newErrors:any = {};
-    //         error.errors.forEach((err) => {
-    //         newErrors[err.path[0]] = err.message;
-    //         });
-    //         setErrors(newErrors);  // エラーメッセージを設定
-    //     }
-    //     setIsFormValid(false);  // フォームが無効であることを設定
-    //     }
-    // };
+    useEffect(() => {
+
+        setPage1IsValid(isFormValid);
+    },[isFormValid,setPage1IsValid])
+
 
     const handleImageChange=(e:React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

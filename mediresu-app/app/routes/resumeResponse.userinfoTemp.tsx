@@ -128,12 +128,12 @@ export default function ResumeLayout(){
                     <ItemsAnyComp className="!flex-[0_0_auto]" text="証明写真" />
                     
                     
-      {/* 普通のボタン */}
-      <button
-        className={`mt-4 px-4 py-2 font-semibold rounded ${isFormValid ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-500"}`} // ボタンの色を変更
-        disabled={!isFormValid} // フォームが無効な場合はボタンを無効化
-        onClick={() => alert("次へ進む")} // 実際には次のページへ遷移させる処理
-      ></button>
+                    {/* 普通のボタン */}
+                    <button
+                      className={`mt-4 px-4 py-2 font-semibold rounded ${isFormValid ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-500"}`} // ボタンの色を変更
+                      disabled={!isFormValid} // フォームが無効な場合はボタンを無効化
+                      onClick={() => alert("次へ進む")} // 実際には次のページへ遷移させる処理
+                    ></button>
                     {/* <UploadImgComp className="!self-stretch !w-full"  /> */}
                     <BackNextComp className="!self-stretch !w-full" img="/img/userinfo/subtract-7.svg" subtract="/img/userinfo/subtract-6.svg" topLink="/top" nextLink="../backgroundhanyo"/>
                 </div>

@@ -4,21 +4,18 @@ import { UserEducations, UserEmployments,UserLicenses } from "~/types/user";  //
 import { createInitialUserInfo,createInitialUserEducation,
     createInitialEmployment,createInitialLicense,createInitialUserSelfPr } from "~/types/user";
 import { createDefaultEducation,createDefaultEmployment,createDefaultLicense } from "~/types/user";
-import { useUserInfo } from "~/hooks/useUserInfo"; //カスタムフック
 import { useUserAddedFormManager } from "~/hooks/useUserAddInfo";
-import { supabase } from "~/utils/supabaseClient";
-import { upsertUserBasicInfomation,upsertUserBackgroundData } from "~/services/upsertUserData";
-import { userInfoSchema } from "~/utils/userInfoSchema";
-import { upsertOrderNum } from "~/services/upsertOrderNum";
 import { useUserForm } from "~/hooks/useUserForm";
-import { upsertFormData } from "~/services/upsertFormData";
 import { HeaderComp } from "~/components/userinfo/HeaderComp";
-import { SavePreviewComp } from "~/components/userinfo/SavePreviewComp";
 import prisma from "~/utils/prismaClient";
 import { Prisma } from "@prisma/client";
 import { upsertFormDataPrisma } from "~/services/upsertFormDataPrisma";
 import { upsertOrderNumPrisma } from "~/services/upsertOrderNumPrisma";
 import { sessionStorage} from "~/utils/session";
+import { useEffect, useState } from "react";
+import { useRef } from "react";
+import { number } from "yup";
+
 // バリデーションエラーデータの型定義
 type ValidationError = {
     [key: string]: string;
@@ -110,9 +107,6 @@ export const loader = async ({request}) => {
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
     const userId = session.get("userId");
-    // console.log(request)
-    // console.log("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
-    // console.log(userId);
 
     try {
         const [userInfo, userEdus, userEmps, userLicenses, userPr] = await Promise.all([
@@ -157,19 +151,17 @@ export default function ResumeLayout(){
     const userId = useOutletContext<any>();
 
     const actionData = useActionData<ActionData>();// actionから返されたデータを受け取る
-
-    const initialData = userInfo?.length > 0 ? userInfo[0]:createInitialUserInfo(userId);
-
-    const initialEducationData =  userEdus?.length > 0 ? userEdus:createInitialUserEducation(userId);
     
+    //各フォームデータの初期化
+    const initialData = userInfo?.length > 0 ? userInfo[0]:createInitialUserInfo(userId);
+    const initialEducationData =  userEdus?.length > 0 ? userEdus:createInitialUserEducation(userId);
     const initialEmploymentData = userEmps?.length > 0 ? userEmps:createInitialEmployment(userId);
+    const initialLicenseData = userLicenses?.length > 0 ? userLicenses:createInitialLicense(userId);
+    const initialSelfPr = userPr?.length >0 ? userPr[0]:createInitialUserSelfPr(userId);
 
+    //カスタムフック定義
     const [formData,updateFormData]=useUserForm(initialData);
-    // console.log("OOOOOOOOOOO")
-    // console.log(initialData)
-    // console.log(formData);
-  
-    //const [educationFormData,updateEducationFormData] = useUserAddedFormManager<Prisma.educationsCreateInput>(
+
     const [educationFormData,updateEducationFormData] = useUserAddedFormManager<UserEducations>(
         initialEducationData,
         createDefaultEducation(userId),
@@ -179,15 +171,52 @@ export default function ResumeLayout(){
         initialEmploymentData,
         createDefaultEmployment(userId),
     )
-
-    const initialLicenseData = userLicenses?.length > 0 ? userLicenses:createInitialLicense(userId);
     const [licenseFormData,updateLicenseFormData] = useUserAddedFormManager(
         initialLicenseData,
         createDefaultLicense(userId),
     )
-    const initialSelfPr = userPr?.length >0 ? userPr[0]:createInitialUserSelfPr(userId);
     const [prFormData,updatePrFormData] = useUserForm(initialSelfPr);
 
+
+    useEffect(() => {
+        if(userId){
+            updateFormData(userInfo?.length > 0 ? userInfo[0]:createInitialUserInfo(userId));
+            // updateEducationFormData(userEdus?.length > 0 ? userEdus:createInitialUserEducation(userId),createDefaultEducation(userId));
+            // updateEmploymentFormData(userEmps?.length > 0 ? userEmps:createInitialEmployment(userId),createDefaultEmployment(userId));
+            // updateLicenseFormData(userLicenses?.length > 0 ? userLicenses:createInitialLicense(userId),createDefaultLicense(userId));
+            updatePrFormData(userPr?.length >0 ? userPr[0]:createInitialUserSelfPr(userId));
+
+            const order_num = 1;
+
+            if(userEdus.length === 0){
+                updateEducationFormData({order_num,"user_id":userId},"order_num")
+            }
+            if(userEmps.length === 0){
+                updateEmploymentFormData({order_num,"user_id":userId},"order_num")
+            }
+            if(userLicenses.length===0){
+                updateLicenseFormData({order_num,"user_id":userId},"order_num")
+            }
+        }
+        
+    },[userId])
+
+    
+    //1，2ページのバリデーション判定(フロント)
+    const [page1IsValid, setPage1IsValid] = useState(false);
+    const [page2IsValid, setPage2IsValid] = useState(false);
+    const [isMainFormValid, setIsFormValid] = useState(false);
+
+    useEffect(()=>{
+        setIsFormValid(page1IsValid && page2IsValid);
+    },[page1IsValid,page2IsValid]);
+
+    const saveButtonRef = useRef<HTMLButtonElement>(null);
+    const triggerSave = () => {
+        if(saveButtonRef.current){
+            saveButtonRef.current.click();
+        }
+    }
 
     return(
 <div className="bg-white flex flex-col items-center w-full min-h-screen overflow-y-auto">
@@ -203,6 +232,9 @@ export default function ResumeLayout(){
                 employmentFormData, updateEmploymentFormData,
                 licenseFormData, updateLicenseFormData,
                 prFormData, updatePrFormData,
+                page1IsValid,setPage1IsValid,
+                page2IsValid,setPage2IsValid,
+                triggerSave,isMainFormValid
             }}/>
         </div>
 
@@ -217,9 +249,24 @@ export default function ResumeLayout(){
                     <input type="hidden" name="licenseFormData" value={JSON.stringify(licenseFormData)} />
                     <input type="hidden" name="prFormData" value={JSON.stringify(prFormData)} />
 
-                    <button type="submit" className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
-                        保存する
-                    </button>
+                    {!isMainFormValid?(
+                        <button 
+                            
+                            className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm"
+                            disabled={!isMainFormValid}>
+                            保存する
+                        </button>
+
+                    ):(
+                        <button 
+                            type="submit"
+                            ref={saveButtonRef}
+                            className="w-[110px] h-10 bg-[#24b6ae] rounded-[20px] font-bold text-white text-sm">
+                            保存する
+                        </button>
+
+                    )}
+   
                     <button className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
                         プレビュー
                     </button>

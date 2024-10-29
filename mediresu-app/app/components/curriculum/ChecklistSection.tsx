@@ -57,10 +57,10 @@ export const ChecklistSection = ({
         <div className="flex items-start pt-2.5 pb-0 px-5 relative self-stretch w-full flex-[0_0_auto]">
           <div className="flex h-[50px] items-center relative flex-1 grow ">
           <div
-  className={`flex flex-col items-center justify-center px-1 py-3 relative flex-1 self-stretch grow mt-[-1.00px] mb-[-1.00px] ml-[-1.00px] mr-[-1.00px] rounded-[4px_0px_0px_0px] border border-solid border-[#24b6ae] ${
-    checkedCount > 0 ? 'bg-[#24b6ae] text-[#eefffe]' : 'bg-[#eefffe] text-[#24b6ae]'
-  }`}
->
+            className={`flex flex-col items-center justify-center px-1 py-3 relative flex-1 self-stretch grow mt-[-1.00px] mb-[-1.00px] ml-[-1.00px] mr-[-1.00px] rounded-[4px_0px_0px_0px] border border-solid border-[#24b6ae] ${
+              checkedCount > 0 ? 'bg-[#24b6ae] text-[#eefffe]' : 'bg-[#eefffe] text-[#24b6ae]'
+            }`}
+          >
               <div className="w-fit ml-[-4.50px] mr-[-2.50px] font-bold text-base text-center whitespace-nowrap relative [font-family:'Inter',Helvetica] tracking-[0] leading-[normal]">
                 {checkedCount} / {itemCount}
               </div>
