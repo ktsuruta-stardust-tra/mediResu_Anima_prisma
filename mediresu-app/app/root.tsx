@@ -11,8 +11,6 @@ import { sendProfileToServer,getProfile } from "./utils/liff";
 import liff from "@line/liff";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-
-
 import "./tailwind.css";
 
 export const links: LinksFunction = () => [
@@ -55,27 +53,43 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
 
-  const [userId, setUserId] = useState(null);
-  const [saveStatus, setSaveStatus] = useState(null); 
+  const [userId, setUserId] = useState("");
+  const [saveStatus, setSaveStatus] = useState(""); 
   const {liffId} = useLoaderData();
   
   useEffect(() => {
-    liff.init({ liffId}).then(() => {
+    liff.init({ liffId }).then(() => {
       if (liff.isLoggedIn()) {
-        getProfile().then(profile => {
-          sendProfileToServer(profile).then(result => {
-            setSaveStatus(result.success ? "保存成功" : "保存失敗");
+        getProfile()
+          .then(profile => {
+            sendProfileToServer(profile)
+              .then(result => {
+                setSaveStatus(result.success ? "保存成功" : "保存失敗");
+  
+                if (result.success && result.userId) {
+                  setUserId(result.userId);
+                }
+              })
+              .catch(error => {
+                console.error("プロフィールのサーバー送信エラー:", error);
+                setSaveStatus("保存失敗");
+              });
+          })
 
-            if(result.success && result.userId){
-              setUserId(result.userId);
-            }
+          .catch(error => {
+            console.error("プロフィール取得エラー:", error);
+            setSaveStatus("プロフィール取得失敗");
           });
-        });
       } else {
         liff.login();
       }
+
+    }).catch(error => {
+      console.error("LIFF初期化エラー:", error);
+      setSaveStatus("LIFF初期化失敗");
     });
-  }, []);
+
+  }, [liffId]);
 
 
   return <Outlet context={userId}/>;

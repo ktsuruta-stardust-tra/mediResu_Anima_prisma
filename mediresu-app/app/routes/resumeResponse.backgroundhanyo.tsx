@@ -18,6 +18,7 @@ import { educationsSchema,employmentsSchema } from "~/utils/zodSchemas";
 import { CheckedBackEndComp } from "~/components/userinfo/CheckedBackEndComp";
 import { selfPrsSchema } from "~/utils/zodSchemas";
 import { z } from "zod";
+
 type OutletContextType = {
   educationFormData: UserEducations[];
   updateEducationFormData:(newData:Partial<UserEducations> & {order_num:number},orderNumKey: keyof UserEducations) => void;
@@ -33,11 +34,10 @@ type OutletContextType = {
   setPage2IsValid: (isValid: boolean) => void;
   triggerSave:()=> void;
   isMainFormValid:boolean;
-
 }
 
 export default function ResumeLayout(){
-
+    
     const {
       educationFormData,updateEducationFormData,
       employmentFormData,updateEmploymentFormData,
@@ -51,7 +51,6 @@ export default function ResumeLayout(){
     const [educationErrors, setEducationErrors] = useState<string[][]>([]);
     const [employmentErrors, setEmploymentErrors] = useState<string[][]>([]);
     const [prError,setPrError] = useState<string>();
-
     const [isFormValid, setIsFormValid] = useState(false);
 
     // 学歴データの変更時にバリデーションを実行
@@ -69,7 +68,7 @@ export default function ResumeLayout(){
       validateEducationData();
       console.log(educationErrors)
     }, [educationFormData]);
-    
+
     // 職歴データの変更時にバリデーションを実行
     useEffect(() => {
       const validateEmploymentData = () => {
@@ -82,10 +81,8 @@ export default function ResumeLayout(){
         });
         setEmploymentErrors(validationErrors);
       };
-
       validateEmploymentData();
     }, [employmentFormData]);
-
 
     useEffect(() => {
       try {
@@ -102,7 +99,6 @@ export default function ResumeLayout(){
       console.log(prError);
     }, [prFormData]); 
 
-
     // エラーステートを監視して「完了」ボタンの有効/無効を更新
     useEffect(() => {
       const noEducationErrors = educationErrors.every((errs) => errs.length === 0);
@@ -116,9 +112,7 @@ export default function ResumeLayout(){
       setPage2IsValid(isFormValid);
     },[isFormValid,setPage2IsValid])
 
-
     const navigate = useNavigate();
-
 
     // //1ページ目のバリデーションが終わってなかったら1ページ目にリダイレクト
     // useEffect(() => {
@@ -127,8 +121,6 @@ export default function ResumeLayout(){
     //     navigate("../userinfo", { replace: true }); // replaceオプションで履歴を変更せずリダイレクト
     //   }
     // }, [page1IsValid, navigate]);
-
-
     const handleInputChange = (
       order_num:number,
       field: keyof UserEducations,
@@ -303,8 +295,6 @@ export default function ResumeLayout(){
               </div>
           </div>
       </main>
-
-
     );
 
 }
