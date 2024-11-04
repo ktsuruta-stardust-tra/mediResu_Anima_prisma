@@ -17,6 +17,7 @@ import { upsertFormDataPrisma } from '~/services/upsertFormDataPrisma';
 import { upsertOrderNumPrisma } from '~/services/upsertOrderNumPrisma';
 import { syncEmploymentsWithJobHistories } from '~/utils/transferEmploymentsToJobHistories';
 import { sessionStorage } from '~/utils/session';
+import { useNavigation } from '@remix-run/react';
 
 export const loader = async ({request}) => {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
@@ -170,7 +171,7 @@ export const action:ActionFunction = async ({request}) => {
     await upsertFormDataPrisma(jobSummaryFormData,"job_summaries");
 
     await upsertFormDataPrisma(skillsFormData,"skills_experiences");
-    return redirect("/top");
+    return redirect("/top?status=success");
 
 }
 
@@ -199,13 +200,10 @@ export default function ParentForm() {
     const [experienceFormData,updateExperienceFormData] = useExperienceItems<any>(initialExperienceFormData);
 
     type jobHistoryType = Prisma.PromiseReturnType<typeof prisma.job_histories.findMany>[0]
-
     const initialJobHistoryFormData = tempUserJobHistory;
 
-
     const [jobHistoryFormData,updateJobHistoryFormData] = useUserAddedFormManager<any>(initialJobHistoryFormData,createDefaultUserJobHistory(userId));
-    
-    
+        
     const initialJobSummaryFormData = tempUserJobSummary?.length > 0 ? tempUserJobSummary[0]:createInitialUserJobSummary(userId);
 
     const [jobSummaryFormData,updateJobSummaryFormData] = useUserForm(initialJobSummaryFormData);
@@ -276,10 +274,23 @@ export default function ParentForm() {
         }
     }
 
-
+    // transition.submissionがnullでない場合は処理中であることを示す
+    const navigation = useNavigation();
+    // フォームが送信中かどうかを判定
+    const isSubmitting = navigation.state === "submitting";
 
     return (
         <div className="bg-white flex flex-col items-center w-full min-h-screen overflow-y-auto">
+
+            {/* スピナー */}
+            {isSubmitting && (
+              <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50 z-50">
+                <div
+                    className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"
+                    aria-label="読み込み中"
+                ></div>
+              </div>
+            )}
             <div className="bg-white w-full max-w-[375px]">
                 {/* ヘッダーコンポーネント */}
                 <HeaderComp className="w-full" group="/img/userinfo/group-3-1.png" />

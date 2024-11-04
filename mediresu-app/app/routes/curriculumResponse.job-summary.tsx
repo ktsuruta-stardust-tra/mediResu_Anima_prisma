@@ -11,7 +11,7 @@ import { useState } from "react";
 import { jobSummariesSchema } from "~/utils/zodSchemas";
 import { useEffect } from "react";
 import { z } from "zod";
-import { CheckedBackNextComp } from "~/components/userinfo/CheckedBackNextComp";
+import { CheckedBackNextComp } from "~/components/CheckedBackNextComp";
 import { skillsExperiencesSchema } from "~/utils/zodSchemas";
 
 export default function UserExperiencePage() {
@@ -33,6 +33,8 @@ export default function UserExperiencePage() {
     const [isFormValid,setIsFormValid] = useState(false);
     const [error, setError] = useState<string>(); 
     const [skillError,setSkillError]=useState<string>();
+    const [isErrorShow,setIsErrorShow] = useState(false);
+
 
     const jobSummaryHandleInputChange = async (name:string ,value:any) =>{
 
@@ -82,10 +84,20 @@ export default function UserExperiencePage() {
     });
 
     useEffect(() => {
-        setPage1IsValid(isFormValid);
 
+        if(isFormValid){
+            setIsErrorShow(false);
+        }
+        setPage1IsValid(isFormValid);
     },[isFormValid,setPage1IsValid])
 
+
+    const handleNextButton=()=>{
+        if(!isFormValid){
+            setIsErrorShow(true);
+            window.alert("入力に誤りがあります")
+        }
+    }
 
     return(
         <main className="flex flex-col items-center w-full bg-[#d9ecec]">
@@ -135,7 +147,7 @@ export default function UserExperiencePage() {
                 <div className="flex flex-col items-start px-0 py-[30px] w-full bg-white rounded-md">
                     <TitleComp className="w-full" text="職務要約" />
                     <ItemsComp text="職務要約(500文字以内)" />
-                    {error && <p className="ml-5" style={{ color: "red" }}>{error}</p>
+                    {error && isErrorShow && <p className="ml-5" style={{ color: "red" }}>{error}</p>
                     
                     }
                     <LongTextComp
@@ -169,6 +181,7 @@ export default function UserExperiencePage() {
                         topLink="/top"
                         nextLink="../category-step1"
                         isValid={isFormValid}
+                        handle={handleNextButton}
                     />
                 </div>
             </div>

@@ -13,7 +13,7 @@ export async function getProfile() {
 
 export async function sendProfileToServer(profile:any) {
     // await fetch("https:///z-110-54-74-143.ngrok-free.app", {
-    const response = await fetch("/test", {
+    const response = await fetch("/getUserId", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

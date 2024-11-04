@@ -5,10 +5,10 @@ type ToastProps = {
     onClose: () => void;
 };
 export function Toast({ message, onClose }: ToastProps) {
-    useEffect(() => {
-        const timer = setTimeout(onClose, 2000); // 2秒後に自動で閉じる
-        return () => clearTimeout(timer);
-    }, [onClose]);
+    // useEffect(() => {
+    //     const timer = setTimeout(onClose, 2000); // 2秒後に自動で閉じる
+    //     return () => clearTimeout(timer);
+    // }, [onClose]);
 
     return (
         <div style={{

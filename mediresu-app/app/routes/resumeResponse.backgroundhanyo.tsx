@@ -15,7 +15,7 @@ import { DeleteButtonComp } from "~/components/userinfo/DeleteButtonComp";
 import { useState } from "react";
 import { useEffect } from "react";
 import { educationsSchema,employmentsSchema } from "~/utils/zodSchemas";
-import { CheckedBackEndComp } from "~/components/userinfo/CheckedBackEndComp";
+import { CheckedBackEndComp } from "~/components/CheckedBackEndComp";
 import { selfPrsSchema } from "~/utils/zodSchemas";
 import { z } from "zod";
 
@@ -34,6 +34,7 @@ type OutletContextType = {
   setPage2IsValid: (isValid: boolean) => void;
   triggerSave:()=> void;
   isMainFormValid:boolean;
+  isSubmitting:boolean;
 }
 
 export default function ResumeLayout(){
@@ -44,7 +45,8 @@ export default function ResumeLayout(){
       licenseFormData,updateLicenseFormData,
       prFormData,updatePrFormData,
       page1IsValid,
-      setPage2IsValid,triggerSave,isMainFormValid
+      setPage2IsValid,triggerSave,isMainFormValid,
+      isSubmitting
     } = useOutletContext<OutletContextType>();
 
     // エラーステートをFormDataと同じ構造で定義
@@ -52,6 +54,8 @@ export default function ResumeLayout(){
     const [employmentErrors, setEmploymentErrors] = useState<string[][]>([]);
     const [prError,setPrError] = useState<string>();
     const [isFormValid, setIsFormValid] = useState(false);
+    const [isErrorShow,setIsErrorShow] = useState(false);
+
 
     // 学歴データの変更時にバリデーションを実行
     useEffect(() => {
@@ -109,18 +113,14 @@ export default function ResumeLayout(){
 
     //親フォームへ2ページ目のステータスを送るよう
     useEffect(()=> {
+      if(isFormValid){
+        setIsErrorShow(false);
+      }
+      console.log(isFormValid);
       setPage2IsValid(isFormValid);
     },[isFormValid,setPage2IsValid])
 
-    const navigate = useNavigate();
 
-    // //1ページ目のバリデーションが終わってなかったら1ページ目にリダイレクト
-    // useEffect(() => {
-    //   // page1IsValidがfalseの場合、1ページ目にリダイレクト
-    //   if (!page1IsValid) {
-    //     navigate("../userinfo", { replace: true }); // replaceオプションで履歴を変更せずリダイレクト
-    //   }
-    // }, [page1IsValid, navigate]);
     const handleInputChange = (
       order_num:number,
       field: keyof UserEducations,
@@ -151,7 +151,14 @@ export default function ResumeLayout(){
     }
 
     const endHandleChange=async() => {
-      triggerSave();
+
+      if(!isFormValid){
+        setIsErrorShow(true);
+        window.alert("入力に誤りがあります")
+      }
+      else{
+        triggerSave();
+      }
     };
 
     return(
@@ -185,14 +192,13 @@ export default function ResumeLayout(){
           <div className="flex flex-col w-full max-w-[375px] items-start gap-2.5 p-5 bg-[#d9ecec]">
               <div className="flex flex-col items-start px-0 py-[30px] w-full bg-white rounded-md">
                   <TitleComp className="w-full" text="学歴・職歴" />
-                  
                   <div>
                     {educationFormData.map((education,index)=>
                       (education ? (
                         <div key={index}>
                           <ItemsComp text={`学歴.${index+1}(高校以降記入)`} />
 
-                          {educationErrors[index] && educationErrors[index].length > 0 && (
+                          {educationErrors[index] && educationErrors[index].length > 0 &&  isErrorShow &&(
                             <div className="text-red-500">
                               {educationErrors[index].map((error, idx) => (
                                 <p key={idx}>{error}</p>
@@ -223,7 +229,7 @@ export default function ResumeLayout(){
                           <ItemsComp text={`職歴.${index+1}`} />
 
 
-                          {employmentErrors[index] && employmentErrors[index].length > 0 && (
+                          {employmentErrors[index] && employmentErrors[index].length > 0 && isErrorShow &&(
                             <div className="text-red-500">
                               {employmentErrors[index].map((error, idx) => (
                                 <p key={idx}>{error}</p>
@@ -280,7 +286,6 @@ export default function ResumeLayout(){
                     value={prFormData.self_pr_text}
                     handleChange={prHandleChange}
                   />
-
 
                   <CheckedBackEndComp 
                     className="w-full" 

@@ -19,7 +19,7 @@ import { z } from "zod";
 import { useEffect,useState } from "react";
 import { userExperiencesSchema } from "~/utils/zodSchemas";
 import { jobHistoriesSchema } from "~/utils/zodSchemas";
-import { CheckedBackEndComp } from "~/components/userinfo/CheckedBackEndComp";
+import { CheckedBackEndComp } from "~/components/CheckedBackEndComp";
 
 
 export default function UserExperiencePage() {
@@ -48,10 +48,9 @@ export default function UserExperiencePage() {
     const [isFormValid, setIsFormValid] = useState(false);
     const [experienceFormError, setExperienceFormError] = useState<string>(); 
     const [jobHistoryFormError, setjobHistoryFormError] = useState<string[][]>([]); 
+    const [isErrorShow,setIsErrorShow] = useState(false);
 
     useEffect(() =>{
-        console.log(jobHistoryFormData.length,"leng")
-        console.log(jobHistoryFormData)
         if(jobHistoryFormData.length > 0){
             if(jobHistoryFormData[0].company_name !== ""){
                 const validateJobHistoryData = () => {
@@ -93,6 +92,9 @@ export default function UserExperiencePage() {
 
   
     useEffect(()=>{
+        if(isFormValid){
+            setIsErrorShow(false);
+            }
         setPage4IsValid(isFormValid);
     },[isFormValid,setPage4IsValid]);
 
@@ -134,6 +136,10 @@ export default function UserExperiencePage() {
     };
 
     const endHandleChange=async() => {
+        if(!isFormValid){
+            setIsErrorShow(true);
+            window.alert("入力に誤りがあります")
+          }
         triggerSave();
     };
 
@@ -161,7 +167,7 @@ export default function UserExperiencePage() {
                         divClassName="!h-[unset] !mr-[-1.00px] !tracking-[-0.56px] !leading-[normal] !w-fit"
                         text="ご経験があるものにチェックをつけてください。"
                     />
-                     {experienceFormError && <p className="text-red-500 text-sm">{experienceFormError}</p>} {/* エラーメッセージの表示 */}
+                     {experienceFormError && isErrorShow && <p className="text-red-500 text-sm">{experienceFormError}</p>} {/* エラーメッセージの表示 */}
                     <ExperienceChecklistSection title="Windows" name="windows" checked={experienceFormData.windows} handleChange={handleChange} otherText={experienceFormData.other_experience} />
                     <ExperienceChecklistSection title="Mac" name="mac" checked={experienceFormData.mac} handleChange={handleChange} otherText={experienceFormData.other_experience} />
                     <ExperienceChecklistSection title="Microsoft Word" name="microsoft_word" checked={experienceFormData.microsoft_word} handleChange={handleChange} otherText={experienceFormData.other_experience} />
@@ -181,7 +187,7 @@ export default function UserExperiencePage() {
                             <WorkHistoryComp formData={data} />
                             <ItemsComp className="!flex-[0_0_auto]" text="雇用形態"/>
 
-                            {jobHistoryFormError[index] && jobHistoryFormError[index].length >0 && (
+                            {jobHistoryFormError[index] && jobHistoryFormError[index].length >0 &&  isErrorShow &&(
                                 <div className="text-red-500">
                                     {jobHistoryFormError[index].map((error,idx) => (
                                         <p key={idx}>{error}</p>

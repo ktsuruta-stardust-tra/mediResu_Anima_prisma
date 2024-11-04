@@ -13,6 +13,7 @@ interface Props {
   download1:string;
   download2:string;
   link:string;
+  handleChange :() => void;
 }
 
 export const BodyComp = ({
@@ -27,6 +28,8 @@ export const BodyComp = ({
   download1 = "履歴書を",
   download2 = "ダウンロード",
   link,
+  handleChange,
+  
 }: Props): JSX.Element => {
   
   const text1 = (
@@ -47,7 +50,11 @@ export const BodyComp = ({
     
     
     <div className={`flex flex-col w-[335px] items-center gap-5 relative ${className}`}>
-      <Link to={link} className="flex h-[60px] items-center justify-center gap-2.5 px-[89px] py-[18px] relative self-stretch w-full bg-white rounded-lg shadow-[0px_2px_2px_#00000040] active:scale-95 transition-transform duration-150 ease-in-out">
+      <Link 
+        to={link} 
+        className="flex h-[60px] items-center justify-center gap-2.5 px-[89px] py-[18px] relative self-stretch w-full bg-white rounded-lg shadow-[0px_2px_2px_#00000040] active:scale-95 transition-transform duration-150 ease-in-out"
+        onClick={handleChange}
+      >
         <img
           className={`relative w-[25.91px] h-[23px] ml-[-2.46px] ${groupClassName}`}
           alt="Group"

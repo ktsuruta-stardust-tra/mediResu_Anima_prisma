@@ -34,7 +34,6 @@ export default function CategoryWithItemsPage1() {
     { stepNumber: "STEP.04", title: "その他の", subtitle: "スキル", isActive: false },
   ];
 
-
   return (
     <main className="flex flex-col items-center w-full bg-[#d9ecec]">
         <div className="flex w-full max-w-[375px] items-center justify-center gap-1.5 bg-white py-4">

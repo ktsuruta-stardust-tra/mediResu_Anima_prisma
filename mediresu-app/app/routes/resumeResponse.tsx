@@ -14,7 +14,8 @@ import { upsertOrderNumPrisma } from "~/services/upsertOrderNumPrisma";
 import { sessionStorage} from "~/utils/session";
 import { useEffect, useState } from "react";
 import { useRef } from "react";
-import { number } from "yup";
+import { useNavigation } from "@remix-run/react";
+
 
 // バリデーションエラーデータの型定義
 type ValidationError = {
@@ -99,7 +100,7 @@ export const action:ActionFunction = async ({request}) => {
     //     return json({ errors }, { status: 400 });
     // }    
 
-    return redirect("/top");
+    return redirect("/top?status=success");
 }
 
 
@@ -201,7 +202,13 @@ export default function ResumeLayout(){
         
     },[userId])
 
-    
+
+    // transition.submissionがnullでない場合は処理中であることを示す
+    const navigation = useNavigation();
+    // フォームが送信中かどうかを判定
+    const isSubmitting = navigation.state === "submitting";
+
+
     //1，2ページのバリデーション判定(フロント)
     const [page1IsValid, setPage1IsValid] = useState(false);
     const [page2IsValid, setPage2IsValid] = useState(false);
@@ -219,68 +226,82 @@ export default function ResumeLayout(){
     }
 
     return(
-<div className="bg-white flex flex-col items-center w-full min-h-screen overflow-y-auto">
-    <div className="bg-white w-full max-w-[375px]">
-        {/* ヘッダーコンポーネント */}
-        <HeaderComp className="w-full" group="/img/userinfo/group-3-1.png" />
-
-        {/* 子フォームをアウトレットで表示 */}
-        <div className="flex-1">
-            <Outlet context={{
-                formData, updateFormData,
-                educationFormData, updateEducationFormData,
-                employmentFormData, updateEmploymentFormData,
-                licenseFormData, updateLicenseFormData,
-                prFormData, updatePrFormData,
-                page1IsValid,setPage1IsValid,
-                page2IsValid,setPage2IsValid,
-                triggerSave,isMainFormValid
-            }}/>
-        </div>
-
-        {/* フッター */}
-        <Form method="post">
-            <div className="w-full px-4 py-2 mt-4">
-                <div className="flex items-center justify-center gap-4 py-2">
-
-                    <input type="hidden" name="formData" value={JSON.stringify(formData)} />
-                    <input type="hidden" name="employmentFormData" value={JSON.stringify(employmentFormData)} />
-                    <input type="hidden" name="educationFormData" value={JSON.stringify(educationFormData)} />
-                    <input type="hidden" name="licenseFormData" value={JSON.stringify(licenseFormData)} />
-                    <input type="hidden" name="prFormData" value={JSON.stringify(prFormData)} />
-
-                    {!isMainFormValid?(
-                        <button 
-                            
-                            className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm"
-                            disabled={!isMainFormValid}>
-                            保存する
-                        </button>
-
-                    ):(
-                        <button 
-                            type="submit"
-                            ref={saveButtonRef}
-                            className="w-[110px] h-10 bg-[#24b6ae] rounded-[20px] font-bold text-white text-sm">
-                            保存する
-                        </button>
-
-                    )}
-   
-                    <button className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
-                        プレビュー
-                    </button>
+        <div className="bg-white flex flex-col items-center w-full min-h-screen overflow-y-auto">
+            {/* スピナー */}
+            {isSubmitting && (
+                <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50 z-50">
+                <div
+                    className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"
+                    aria-label="読み込み中"
+                ></div>
                 </div>
-            </div>
-        </Form>
+            )}
 
-        <div className="w-full border-b border-[#24b6ae] mt-2"></div>
-        <p className="text-[#3d3d3d] text-[10px] px-4 py-2 mt-2 text-center">
-            Copyright © 2024 LOGICA Inc. All Rights Reserved.
-        </p>
+            <div className="bg-white w-full max-w-[375px]">
+                {/* ヘッダーコンポーネント */}
+                <HeaderComp className="w-full" group="/img/userinfo/group-3-1.png" />
+
+                {/* 子フォームをアウトレットで表示 */}
+                <div className="flex-1">
+                    <Outlet context={{
+                        formData, updateFormData,
+                        educationFormData, updateEducationFormData,
+                        employmentFormData, updateEmploymentFormData,
+                        licenseFormData, updateLicenseFormData,
+                        prFormData, updatePrFormData,
+                        page1IsValid,setPage1IsValid,
+                        page2IsValid,setPage2IsValid,
+                        triggerSave,isMainFormValid,
+                        isSubmitting,
+                    }}/>
+                </div>
+
+                {/* フッター */}
+                <Form method="post">
+                    <div className="w-full px-4 py-2 mt-4">
+                        <div className="flex items-center justify-center gap-4 py-2">
+
+                            <input type="hidden" name="formData" value={JSON.stringify(formData)} />
+                            <input type="hidden" name="employmentFormData" value={JSON.stringify(employmentFormData)} />
+                            <input type="hidden" name="educationFormData" value={JSON.stringify(educationFormData)} />
+                            <input type="hidden" name="licenseFormData" value={JSON.stringify(licenseFormData)} />
+                            <input type="hidden" name="prFormData" value={JSON.stringify(prFormData)} />
+
+                            {!isMainFormValid?(
+                                <button 
+                                    
+                                    className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm"
+                                    disabled={!isMainFormValid}>
+                                    保存する
+                                </button>
+
+                            ):(
+                                <button 
+                                    type="submit"
+                                    ref={saveButtonRef}
+                                    disabled={isSubmitting}
+                                    className="w-[110px] h-10 bg-[#24b6ae] rounded-[20px] font-bold text-white text-sm"
+                                >
+                                保存する
+
+                                </button>
+
+                            )}
         
-    </div>
-</div>
+                            <button className="w-[110px] h-10 bg-[#e1e1e1] rounded-[20px] font-bold text-white text-sm">
+                                プレビュー
+                            </button>
+                        </div>
+                    </div>
+                </Form>
+
+                <div className="w-full border-b border-[#24b6ae] mt-2"></div>
+                <p className="text-[#3d3d3d] text-[10px] px-4 py-2 mt-2 text-center">
+                    Copyright © 2024 LOGICA Inc. All Rights Reserved.
+                </p>
+                
+            </div>
+        </div>
 
 
 

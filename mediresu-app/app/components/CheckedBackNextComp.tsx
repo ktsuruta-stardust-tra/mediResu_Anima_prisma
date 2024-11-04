@@ -8,6 +8,7 @@ interface Props {
   topLink: string;
   nextLink: string;
   isValid:boolean;
+  handle:()=>void;
 }
 
 export const CheckedBackNextComp = ({
@@ -17,6 +18,7 @@ export const CheckedBackNextComp = ({
   topLink,
   nextLink,
   isValid,
+  handle,
 }: Props): JSX.Element => {
   return (
     <div className={`flex w-[230px] items-center justify-center gap-2.5 pt-5 pb-0 px-0 relative ${className}`}>
@@ -27,12 +29,15 @@ export const CheckedBackNextComp = ({
         </div>
       </Link>
       {!isValid ?(
-        <div className="flex w-[110px] h-10 items-center justify-center gap-1.5 px-[15px] py-2.5 relative bg-[#e1e1e1] rounded-[20px]">
+        <div className="flex w-[110px] h-10 items-center justify-center gap-1.5 px-[15px] py-2.5 relative bg-[#24b6ae] rounded-[20px] active:scale-95 transition-transform duration-150 ease-in-out">
           
-          <div className="relative w-fit [font-family:'Inter',Helvetica] font-bold text-white text-sm tracking-[0] leading-[normal]">
+          <button 
+            className="relative w-fit mr-[-2.50px] [font-family:'Inter',Helvetica] font-bold text-white text-sm tracking-[0] leading-[normal]"
+            onClick={handle}
+          >
             次へ
-          </div>
-          <img className="relative w-2 h-3" alt="Subtract" src={img} />
+          </button>
+          <img className="relative w-2 h-3" alt="Subtract" src="/img/userinfo/subtract-7.svg" />
         </div>
       ):(
         <Link to={nextLink} className="flex w-[110px] h-10 items-center justify-center gap-1.5 px-[15px] py-2.5 relative bg-[#24b6ae] rounded-[20px] active:scale-95 transition-transform duration-150 ease-in-out">
