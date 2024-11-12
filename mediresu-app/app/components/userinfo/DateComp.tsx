@@ -30,6 +30,7 @@ export const DateComp = ({
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
+  
   return (
     <div className={`flex w-[335px] items-center pt-2.5 pb-0 px-5 bg-white relative ${className}`}>
       <div className="flex w-[100px] gap-1 self-stretch items-center relative">
@@ -59,8 +60,6 @@ export const DateComp = ({
         ))}
       </select>
       
-
-
       <div className="inline-flex flex-col justify-center gap-2.5 pl-0.5 pr-1.5 py-0 flex-[0_0_auto] items-center relative">
         <div className="relative self-stretch mt-[-1.00px] [font-family:'Inter',Helvetica] font-normal text-[#313131] text-xs tracking-[0] leading-[normal]">
           月

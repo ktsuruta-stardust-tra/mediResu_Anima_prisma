@@ -60,7 +60,7 @@ export function WorkHistoryPageOne({
 
         <div className="absolute border border-solid border-black" style={{ width: '188mm', height: '37mm', top: '31mm', left: '10mm' }}>
           <div className="absolute" style={{ top: '2mm', left: '3mm' ,right:"3mm" }}>
-            <div className="text-[#ff0000] text-[10.5px] [font-family:'Inter',Helvetica] font-normal tracking-[0] break-words whitespace-pre-wrap">
+            <div className="text-black text-[10.5px] [font-family:'Inter',Helvetica] font-normal tracking-[0] break-words whitespace-pre-wrap">
               <div>{jobsummaryText}</div>
             </div>
           </div>
@@ -86,7 +86,7 @@ export function WorkHistoryPageOne({
             <span className="text-black text-[2.5mm] [font-family:'Inter',Helvetica] font-normal tracking-[0] leading-[normal]">
               【美容医療の経験】
               <br/>
-              {Object.keys(categoryOne).map((categoryName) =>(
+              {categoryOne && Object.keys(categoryOne).map((categoryName) =>(
                 <div key={categoryName} >
                   &lt;{categoryName}&gt;
                   <br/>
@@ -106,7 +106,7 @@ export function WorkHistoryPageOne({
             <span className="text-black text-[2.5mm] [font-family:'Inter',Helvetica] font-normal tracking-[0] leading-[normal]">
               【保健医療の経験】
               
-              {Object.keys(categoryTwo).map((categoryName) =>(
+              {categoryTwo && Object.keys(categoryTwo).map((categoryName) =>(
                   <div key={categoryName} >
                     &lt;{categoryName}&gt;
                     <br/>

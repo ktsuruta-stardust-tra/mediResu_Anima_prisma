@@ -27,62 +27,136 @@ export default function Index() {
 
   const [saveStatus, setSaveStatus] = useState("");
   const [userId, setUserId] = useState(null);
-  const {liffId} = useLoaderData();
+  const [pushButton,setPushButton]=useState(false);
+  const [isLoading,setIsLoading]=useState(false);
+  const {liffId} =  useLoaderData();
   const navigate = useNavigate();
 
-
-  useEffect(() => {
-    if (!liffId) {
-      setSaveStatus("LIFF IDが取得できませんでした");
-      return;
-    }
-
-    // LIFFの初期化とログイン状態のチェック
+    useEffect(() => {
     liff.init({ liffId }).then(() => {
       if (liff.isLoggedIn()) {
-        // すでにログインしている場合は自動的に `/top` に移動
-        navigate("/top");
+        // ログイン済みであれば自動でプロフィール取得とサーバー送信処理を実行
+        handleProfileFetchAndSave();
       }
     }).catch(error => {
       console.error("LIFF初期化エラー:", error);
       setSaveStatus("LIFF初期化失敗");
     });
-  }, [liffId, navigate]);
+  }, []);
 
   const handleButtonClick = () => {
+    setPushButton(true);
+    setIsLoading(true); // 初期化開始
+
     liff.init({ liffId }).then(() => {
       if (liff.isLoggedIn()) {
-        getProfile()
-          .then(profile => {
-            sendProfileToServer(profile)
-              .then(result => {
-                setSaveStatus(result.success ? "保存成功" : "保存失敗");
-  
-                if (result.success && result.userId) {
-                  setUserId(result.userId);
-                  navigate("/top")
-                }
-              })
-              .catch(error => {
-                console.error("プロフィールのサーバー送信エラー:", error);
-                setSaveStatus("保存失敗");
-              });
-          })
-
-          .catch(error => {
-            console.error("プロフィール取得エラー:", error);
-            setSaveStatus("プロフィール取得失敗");
-          });
+        handleProfileFetchAndSave();
       } else {
-        liff.login();
-        navigate("/top")
+        liff.login({ redirectUri: window.location.href });
       }
-
     }).catch(error => {
       console.error("LIFF初期化エラー:", error);
       setSaveStatus("LIFF初期化失敗");
+      setIsLoading(false);
     });
   };
+
+  const handleProfileFetchAndSave = () => {
+    getProfile()
+      .then(profile => {
+        sendProfileToServer(profile)
+          .then(result => {
+            setSaveStatus(result.success ? "保存成功" : "保存失敗");
+
+            if (result.success && result.userId) {
+              setUserId(result.userId);
+              navigate("/top"); // 成功時に「/top」ページへ遷移
+            }
+          })
+          .catch(error => {
+            console.error("プロフィールのサーバー送信エラー:", error);
+            setSaveStatus("保存失敗");
+          });
+      })
+      .catch(error => {
+        console.error("プロフィール取得エラー:", error);
+        setSaveStatus("プロフィール取得失敗");
+      })
+      .finally(() => {
+        setIsLoading(false); // ロード状態解除
+      });
+  };
+
+  
+  // useEffect(() => {
+  //   if (pushButton && !userId) {
+  //     if (liff.isLoggedIn()) {
+  //       getProfile()
+  //         .then(profile => {
+  //           sendProfileToServer(profile)
+  //             .then(result => {
+  //               setSaveStatus(result.success ? "保存成功" : "保存失敗");
+  
+  //               if (result.success && result.userId) {
+                  
+  //                 setUserId(result.userId);
+  //                 navigate("/top")
+  //               }
+  //             })
+  //             .catch(error => {
+  //               console.error("プロフィールのサーバー送信エラー:", error);
+  //               setSaveStatus("保存失敗");
+  //             });
+  //         })
+
+  //         .catch(error => {
+  //           console.error("プロフィール取得エラー:", error);
+  //           setSaveStatus("プロフィール取得失敗");
+  //         });
+  //     }
+  //   }
+  //   else if(userId){
+  //     navigate("/top")
+  //   }
+
+  // }, [pushButton, navigate]);
+  
+  // const handleButtonClick = () => {
+  //   setPushButton(true);
+  //   liff.init({ liffId }).then(() => {
+  //     if (liff.isLoggedIn()) {
+  //       getProfile()
+  //         .then(profile => {
+  //           sendProfileToServer(profile)
+  //             .then(result => {
+  //               setSaveStatus(result.success ? "保存成功" : "保存失敗");
+  
+  //               if (result.success && result.userId) {
+                  
+  //                 setUserId(result.userId);
+  //                 navigate("/top")
+  //               }
+  //             })
+  //             .catch(error => {
+  //               console.error("プロフィールのサーバー送信エラー:", error);
+  //               setSaveStatus("保存失敗");
+  //             });
+  //         })
+
+  //         .catch(error => {
+  //           console.error("プロフィール取得エラー:", error);
+  //           setSaveStatus("プロフィール取得失敗");
+  //         });
+  //     } else {
+  //       liff.login();
+
+  //   }
+
+  //   }).catch(error => {
+  //     console.error("LIFF初期化エラー:", error);
+  //     setSaveStatus("LIFF初期化失敗");
+  //   });
+  // };
 
 
   return (

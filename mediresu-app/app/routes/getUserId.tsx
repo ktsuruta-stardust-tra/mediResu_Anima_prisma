@@ -9,6 +9,8 @@ import prisma from "~/utils/prismaClient";
 import { sessionStorage } from "~/utils/session";
 
 export let action = async ({ request }) => {
+
+  
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
   try{

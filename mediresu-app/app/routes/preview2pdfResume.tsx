@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Preview2PdfWorkHistory() {
+export default function Preview2PdfResume() {
   const handleDownloadPDF = async () => {
     try {
       // PDF生成用のAPIエンドポイントにPOSTリクエストを送信
@@ -10,8 +10,8 @@ export default function Preview2PdfWorkHistory() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          url: "/previewWorkHistory", // PDF化するリンクを含めて送信
-          landscape:false,
+          url: "/previewResume", // PDF化するリンクを含めて送信
+          landscape:true,
         })
       });
 
@@ -29,7 +29,7 @@ export default function Preview2PdfWorkHistory() {
       // ダウンロードリンクをプログラムでクリックしてPDFをダウンロード
       const link = document.createElement("a");
       link.href = pdfObjectUrl;
-      link.download = "work_history.pdf"; // ダウンロード時のファイル名
+      link.download = "resume.pdf"; // ダウンロード時のファイル名
       document.body.appendChild(link); // 一時的にリンクをDOMに追加
       link.click(); // 自動クリックでダウンロード
       document.body.removeChild(link); // リンクをDOMから削除
@@ -44,7 +44,7 @@ export default function Preview2PdfWorkHistory() {
 
   return (
     <div>
-      <h1>職務経歴書PDFダウンロード</h1>
+      <h1>履歴書PDFダウンロード</h1>
       <button onClick={handleDownloadPDF} className="mt-4 p-2 bg-blue-500 text-white rounded">
         Download PDF
       </button>

@@ -204,6 +204,7 @@ model user_informations {
   photo_base64            String?   @db.Text // Base64エンコードされた写真データを格納
   created_at              DateTime? @default(now()) @db.Timestamp(6)
   updated_at              DateTime? @default(now()) @db.Timestamp(6)
+  gender                  String    @db.VarChar(3) // 性別フィールドを追加
   users                   users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 

@@ -32,7 +32,7 @@ export const WorkHistoryPageThree = ({jobHistoryOne,jobHIstoryTwo}:Props): JSX.E
             </div>
 
             <div className="flex w-[482px] h-[26px] items-center justify-center gap-2.5 px-[19px] py-0.5 absolute top-0 left-[53px] bg-white border border-solid border-black">
-              <div className="w-fit text-[#ff0000] text-[8px] relative [font-family:'Inter',Helvetica] font-normal text-justify tracking-[0] leading-[normal]">
+              <div className="w-fit text-[#000000] text-[8px] relative [font-family:'Inter',Helvetica] font-normal text-justify tracking-[0] leading-[normal]">
                 {jobHistoryOne && jobHistoryOne.company_name}
               </div>
             </div>
@@ -83,7 +83,7 @@ export const WorkHistoryPageThree = ({jobHistoryOne,jobHIstoryTwo}:Props): JSX.E
           </div>
 
           <div className="flex w-[482px] h-[26px] items-center justify-center gap-2.5 px-[19px] py-0.5 absolute top-0 left-[53px] bg-white border border-solid border-black">
-            <div className="w-fit text-[#ff0000] text-[8px] relative [font-family:'Inter',Helvetica] font-normal text-justify tracking-[0] leading-[normal]">
+            <div className="w-fit text-[#000000] text-[8px] relative [font-family:'Inter',Helvetica] font-normal text-justify tracking-[0] leading-[normal]">
               {jobHIstoryTwo && jobHIstoryTwo.company_name}
             </div>
           </div>

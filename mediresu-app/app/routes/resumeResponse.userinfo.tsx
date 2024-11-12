@@ -1,6 +1,5 @@
 import { useLoaderData,Link, useOutletContext } from "@remix-run/react";
 import { useEffect,useState } from "react";
-import { UserInfo } from "~/types/user";
 import { userInfoSchema } from "~/utils/userInfoSchema";
 import { TitleComp } from "~/components/userinfo/TitleComp";
 import { ItemsComp } from "~/components/userinfo/ItemsComp";
@@ -15,10 +14,12 @@ import { BackNextComp } from "~/components/userinfo/BackNextComp";
 import { CheckedBackNextComp } from "~/components/CheckedBackNextComp";
 import { userInformationsSchema,customErrorMap } from "~/utils/zodSchemas";
 import { isValid, z } from "zod";
+import { GenderComp } from "~/components/userinfo/GenderComp";
+import { user_informations } from "@prisma/client";
 
 type OutletContextType = {
-    formData: UserInfo;
-    updateFormData:(newData:Partial<UserInfo>) => void;
+    formData: user_informations;
+    updateFormData:(newData:Partial<user_informations>) => void;
     page1IsValid:boolean;
     setPage1IsValid:(isValid: boolean) => void;
     page2IsValid:boolean;
@@ -32,7 +33,7 @@ export default function ResumeLayout(){
     const [errors,setErrors] = useState<{[key:string]:string}>({});
     const [isFormValid, setIsFormValid] = useState(false); // フォームの有効性を管理
     const [isErrorShow,setIsErrorShow] = useState(false);
-
+    
     // フィールド変更時の処理
     const handleChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -129,6 +130,10 @@ export default function ResumeLayout(){
                     {errors.birth_month && isErrorShow && <p className="ml-5" style={{ color: "red" }}>{errors.birth_month}</p>} 
                     {errors.birth_day && isErrorShow && <p className="ml-5" style={{ color: "red" }}>{errors.birth_day}</p>} 
                     
+                    <ItemsComp className="!flex-[0_0_auto]" text="性別" />
+                    <GenderComp className="!self-stretch !w-full" value={formData.gender} name="gender" handleChange={handleChange}/>
+                    {errors.gender && isErrorShow && <p className="ml-5" style={{ color: "red" }}>{errors.gender}</p>} 
+
                     <ItemsComp className="!flex-[0_0_auto]" text="郵便番号" />
                     <PostCodeComp className="!self-stretch !w-full" value={formData.postal_code} name="postal_code" handleChange={handleChange}/>
                     {errors.postal_code && isErrorShow && <p style={{ color: "red" }}>{errors.postal_code}</p>} 

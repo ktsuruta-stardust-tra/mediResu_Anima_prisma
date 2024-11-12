@@ -37,12 +37,6 @@ export const action:ActionFunction = async ({request}) => {
     const receivedPrData = JSON.parse(formData.get("prFormData") as string);
 
 
-    // データベースへの保存処理やその他の処理をここで行う
-    // 例: SupabaseやPrismaなどを使って保存
-    // console.log(formData);
-    // // console.log("Form Data:", receivedFormData);
-    // console.log("Education Data:", receivedEducationData);
-    // console.log("Education Data:", receivedEmploymentData);
    
     // try{
         // Yupスキーマを使用してバリデーション
@@ -108,7 +102,11 @@ export const loader = async ({request}) => {
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
     const userId = session.get("userId");
-
+    //const userId = 4
+    if (!userId) {
+        return new Response("User not authenticated", { status: 401 });
+    }
+    
     try {
         const [userInfo, userEdus, userEmps, userLicenses, userPr] = await Promise.all([
           prisma.user_informations.findMany({

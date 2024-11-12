@@ -64,7 +64,7 @@ export default function UserExperiencePage() {
                     setjobHistoryFormError(validationErrors);
                 };
                 validateJobHistoryData();
-                console.log(jobHistoryFormError)
+                // console.log(jobHistoryFormError)
             }
         }
     },[jobHistoryFormData])

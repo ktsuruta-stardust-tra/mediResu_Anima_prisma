@@ -14,12 +14,11 @@ interface CategoryOperationDict {
       inputText: string | null;
     }[];
 }
-
 export const loader = async ({request}) => {
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
   
     const userId = session.get("userId");
-  
+    // const userId = 4
     if (!userId) {
       return new Response("User not authenticated", { status: 401 });
     }
@@ -33,8 +32,6 @@ export const loader = async ({request}) => {
         jobSummary,
         skills,
       ] = await Promise.all([
-  
-
   
         // Prismaクエリでデータを取得
         prisma.user_operations.findMany({
@@ -99,6 +96,8 @@ export const loader = async ({request}) => {
         }),
   
       ]);
+
+    console.log(userOperations,jobHistory)
     
 
     // 辞書を生成
@@ -164,22 +163,22 @@ export default function previewWorkHistory() {
     }= useLoaderData<any>();
 
     const historyArray = [];
-    for ( let i = 0;i < jobHistory.length; i += 2){
-        historyArray.push(jobHistory.slice(i,i+2));
+    if(jobHistory){
+        for ( let i = 0;i < jobHistory.length; i += 2){
+            historyArray.push(jobHistory.slice(i,i+2));
+        }
     }
-
     return(
         <main>
             <WorkHistoryPageOne 
-                jobSummary={jobSummary.length > 0 ?  jobSummary[0]: ""} 
-                skills={skills.length > 0 ? skills[0]: ""}
+                jobSummary={jobSummary ?  jobSummary[0]: ""} 
+                skills={skills ? skills[0]: ""}
                 categoryOne={categoryOperationDict1to4}
                 categoryTwo={categoryOperationDict5andAbove}
-                experience={userExperienceFormData.length > 0 ? userExperienceFormData[0]:""}
+                experience={userExperienceFormData ? userExperienceFormData[0]:""}
             />
             <WorkHistoryPageTwo />
 
-            
             {historyArray.map((element,index) =>(
                 <div key={index}>
                     <WorkHistoryPageThree jobHistoryOne= {element[0] ? element[0]:""} jobHistoryTwo={element[1] ? element[1]:""}/>

@@ -18,12 +18,11 @@ import { upsertOrderNumPrisma } from '~/services/upsertOrderNumPrisma';
 import { syncEmploymentsWithJobHistories } from '~/utils/transferEmploymentsToJobHistories';
 import { sessionStorage } from '~/utils/session';
 import { useNavigation } from '@remix-run/react';
-
 export const loader = async ({request}) => {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
   const userId = session.get("userId");
-
+  
   if (!userId) {
     return new Response("User not authenticated", { status: 401 });
   }
@@ -126,6 +125,7 @@ export const action:ActionFunction = async ({request}) => {
     
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
     const userId = session.get("userId");
+
     let result = await deleteUserDataPrisma(userId, "user_operations");
     
     if (result.status === "error") {
@@ -160,7 +160,7 @@ export const action:ActionFunction = async ({request}) => {
     await upsertFormDataPrisma(experienceFormData,"user_experiences");
 
     // 全てのupsertOrderNumを並行して実行
-    console.log(jobHistoryFormDatas)
+    // console.log(jobHistoryFormDatas)
     await Promise.all(
         jobHistoryFormDatas.map((jobHistoryFormData:any) => 
             upsertOrderNumPrisma(jobHistoryFormData, "job_histories")
@@ -183,6 +183,7 @@ export default function ParentForm() {
     }= useLoaderData<any>();
 
     const userId = useOutletContext<any>();
+
 
       // `categories`から「その他」のIDと初期テキストを動的に生成
     const otherIds = categories.flatMap((category:any) =>

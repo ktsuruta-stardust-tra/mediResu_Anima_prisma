@@ -199,7 +199,11 @@ export const userInformationsSchema = z.object({
   email_address: z.string().email("有効なメールアドレスを入力してください"),  // 必須
   alternate_email_address: z.string().email("有効なメールアドレスを入力してください").optional().nullable(),  // 任意
   alternate_contact: z.string().optional().nullable(),  // 任意フィールド
-  photo_base64: z.string().optional().nullable()  // 任意フィールド
+  photo_base64: z.string().optional().nullable(),  // 任意フィールド
+  gender: z
+  .string()
+  .min(1, "性別は必須です")
+  .max(3, "性別は3文字以内で入力してください")  // 3文字以内
 });
 
 

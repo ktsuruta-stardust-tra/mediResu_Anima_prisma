@@ -6,13 +6,6 @@ import { useState } from "react";
 import { useLocation,useNavigation } from "@remix-run/react";
 import { useEffect } from "react";
 
-// export const meta: MetaFunction = () => {
-//   return [
-//     { title: "New Remix App" },
-//     { name: "description", content: "Welcome to Remix!" },
-//   ];
-// };
-
 export default function Top() {
     const location = useLocation();
     const [message,setMessage] = useState("");
@@ -38,6 +31,52 @@ export default function Top() {
     const handleChange = () => {
       setIsLoading(true);
     }
+
+    const handleDownloadPDF = async (previewUrl:string,landscape:boolean,pdfName:string) => {
+      setIsLoading(true);
+      try {
+        
+        // PDF生成用のAPIエンドポイントにPOSTリクエストを送信
+        const response = await fetch("/generate-pdf", { 
+          method: "POST" ,
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            //url: "/previewWorkHistory", // PDF化するリンクを含めて送信
+            url:previewUrl,
+            landscape:landscape,
+          })
+        });
+  
+        // レスポンスがPDFではない場合にエラーをスロー
+        if (!response.ok || response.headers.get("Content-Type") !== "application/pdf") {
+          throw new Error("Expected a PDF response, but got something else.");
+        }
+  
+        // PDFデータをblobとして取得
+        const pdfBlob = await response.blob();
+  
+        // ダウンロードリンクを生成
+        const pdfObjectUrl = URL.createObjectURL(pdfBlob);
+  
+        // ダウンロードリンクをプログラムでクリックしてPDFをダウンロード
+        const link = document.createElement("a");
+        link.href = pdfObjectUrl;
+        link.download = pdfName; // ダウンロード時のファイル名
+        document.body.appendChild(link); // 一時的にリンクをDOMに追加
+        link.click(); // 自動クリックでダウンロード
+        document.body.removeChild(link); // リンクをDOMから削除
+  
+        // オブジェクトURLを解放（メモリリーク防止）
+        URL.revokeObjectURL(pdfObjectUrl);
+  
+      } catch (error) {
+        console.error("Failed to generate or download PDF:", error);
+      }
+      setIsLoading(false);
+    };
+
     return (
       <div className="bg-white flex flex-col items-center justify-start w-full min-h-screen overflow-y-auto">
 
@@ -75,7 +114,12 @@ export default function Top() {
               download1="履歴書を"
               download2="ダウンロード"
               link="../resumeResponse/userinfo"
+              previewLink="/previewResume"
               handleChange={handleChange}
+              url="/previewResume"
+              landscape={true}
+              pdfName="resume.pdf"
+              handleDownloadPDF={handleDownloadPDF}
             />
   
             <BodyComp
@@ -90,7 +134,12 @@ export default function Top() {
               download1="職務経歴書を"
               download2="ダウンロード"
               link="../curriculumResponse/job-summary"
+              previewLink="/previewWorkHistory"
               handleChange={handleChange}
+              url="/previewWorkHistory"
+              landscape={false}
+              pdfName="work_histroy.pdf"
+              handleDownloadPDF={handleDownloadPDF}
             />
           </div>
         <p className="text-[#3d3d3d] text-[10px] px-4 py-2 mt-2 text-center">
