@@ -10,6 +10,7 @@
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc",
     "postinstall": "prisma generate"
+    
   },
   "dependencies": {
     "@conform-to/react": "^1.2.2",
