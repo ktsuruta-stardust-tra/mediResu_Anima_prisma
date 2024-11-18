@@ -1,5 +1,5 @@
 import { ActionFunction } from "@remix-run/node";
-import chromium from "chrome-aws-lambda";
+import chromium from "@sparticuz/chrome-aws-lambda"
 
 export const action: ActionFunction = async ({ request }) => {
   try {
