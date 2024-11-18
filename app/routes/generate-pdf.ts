@@ -10,7 +10,8 @@ export const action: ActionFunction = async ({ request }) => {
     }
 
     const fullUrl = `${new URL(request.url).origin}${relativeUrl}`;
-
+    console.log("Generating PDF for URL:", fullUrl);
+    
     const browser = await chromium.puppeteer.launch({
       args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
       defaultViewport: chromium.defaultViewport,
