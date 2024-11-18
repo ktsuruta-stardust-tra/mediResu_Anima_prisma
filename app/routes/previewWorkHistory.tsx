@@ -18,7 +18,7 @@ export const loader = async ({request}) => {
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
   
     const userId = session.get("userId");
-    // const userId = 4
+    //const userId = 4
     if (!userId) {
       return new Response("User not authenticated", { status: 401 });
     }

@@ -9,14 +9,14 @@ interface Props {
 }
 
 // メインコンポーネント
-export const WorkHistoryPageThree = ({jobHistoryOne,jobHIstoryTwo}:Props): JSX.Element => {
+export const WorkHistoryPageThree = ({jobHistoryOne,jobHistoryTwo}:Props): JSX.Element => {
 
 
   return (
     <div className="bg-gray-200 flex items-center justify-center min-h-screen">
 
       {/* A4サイズの枠 */}
-      <div className="bg-white border border-gray-500 w-[210mm] h-[297mm] relative">
+      <div className="bg-white border border-gray-500 w-[210mm] h-[297mm] max-w-[210mm] max-h-[297mm] flex-shrink-0  relative ">
         <div         
           style={{
           transform: "scale(1.3)", // 必要な倍率に調整します
@@ -84,7 +84,7 @@ export const WorkHistoryPageThree = ({jobHistoryOne,jobHIstoryTwo}:Props): JSX.E
 
           <div className="flex w-[482px] h-[26px] items-center justify-center gap-2.5 px-[19px] py-0.5 absolute top-0 left-[53px] bg-white border border-solid border-black">
             <div className="w-fit text-[#000000] text-[8px] relative [font-family:'Inter',Helvetica] font-normal text-justify tracking-[0] leading-[normal]">
-              {jobHIstoryTwo && jobHIstoryTwo.company_name}
+              {jobHistoryTwo && jobHistoryTwo.company_name}
             </div>
           </div>
         </div>
@@ -104,18 +104,18 @@ export const WorkHistoryPageThree = ({jobHistoryOne,jobHIstoryTwo}:Props): JSX.E
           <div className="flex w-[55px] h-[314px] items-start justify-center pt-2.5 pb-0 px-2.5 absolute top-[19px] left-0 bg-white border border-solid border-black">
           <div className="text-[6px] ">
 
-              {jobHIstoryTwo && jobHIstoryTwo.job_start_year + "年" + jobHIstoryTwo.job_start_month + "月"}
+              {jobHistoryTwo && jobHistoryTwo.job_start_year + "年" + jobHistoryTwo.job_start_month + "月"}
               <br/>
               ~
               <br/>
-              {jobHIstoryTwo && jobHIstoryTwo.job_end_year ? jobHIstoryTwo.job_end_year + "年" + jobHIstoryTwo.job_end_month + "月" : ""}
+              {jobHistoryTwo && jobHistoryTwo.job_end_year ? jobHistoryTwo.job_end_year + "年" + jobHistoryTwo.job_end_month + "月" : ""}
             </div>
           </div>
 
           <div className="inline-flex flex-col w-[482px] h-[314px] items-start p-2.5 absolute top-[19px] left-[53px] bg-white border border-solid border-black">
 
             <div className="w-full mt-[-1px] text-black text-[8px] [font-family:'Inter',Helvetica] font-normal break-words whitespace-pre-wrap">
-              {jobHIstoryTwo && jobHIstoryTwo.job_details}
+              {jobHistoryTwo && jobHistoryTwo.job_details}
             </div>
 
           </div>
