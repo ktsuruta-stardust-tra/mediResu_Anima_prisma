@@ -32,49 +32,51 @@ export default function Top() {
       setIsLoading(true);
     }
 
-    const handleDownloadPDF = async (previewUrl:string,landscape:boolean,pdfName:string) => {
+    const handleDownloadPDF = async (previewUrl, landscape, pdfName) => {
       setIsLoading(true);
+      setMessage("PDFを生成中です...");
+    
+      let pdfObjectUrl = null;
+    
       try {
-        
-        // PDF生成用のAPIエンドポイントにPOSTリクエストを送信
-        const response = await fetch("/generate-pdf", { 
-          method: "POST" ,
+        const response = await fetch("/generate-pdf", {
+          method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            //url: "/previewWorkHistory", // PDF化するリンクを含めて送信
-            url:previewUrl,
-            landscape:landscape,
-          })
+            url: previewUrl,
+            landscape: landscape,
+          }),
         });
-  
-        // レスポンスがPDFではない場合にエラーをスロー
+    
         if (!response.ok || response.headers.get("Content-Type") !== "application/pdf") {
-          throw new Error("Expected a PDF response, but got something else.");
+          console.error("Unexpected response:", await response.text());
+          throw new Error("Failed to generate or download PDF.");
         }
-  
-        // PDFデータをblobとして取得
+    
         const pdfBlob = await response.blob();
-  
-        // ダウンロードリンクを生成
-        const pdfObjectUrl = URL.createObjectURL(pdfBlob);
-  
-        // ダウンロードリンクをプログラムでクリックしてPDFをダウンロード
+        pdfObjectUrl = URL.createObjectURL(pdfBlob);
+    
+        const sanitizedPdfName = pdfName.replace(/[^a-zA-Z0-9_\-\.]/g, "_");
         const link = document.createElement("a");
         link.href = pdfObjectUrl;
-        link.download = pdfName; // ダウンロード時のファイル名
-        document.body.appendChild(link); // 一時的にリンクをDOMに追加
-        link.click(); // 自動クリックでダウンロード
-        document.body.removeChild(link); // リンクをDOMから削除
-  
-        // オブジェクトURLを解放（メモリリーク防止）
-        URL.revokeObjectURL(pdfObjectUrl);
-  
+        link.download = sanitizedPdfName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    
+        setMessage("PDFのダウンロードが完了しました！");
+        setTimeout(() => setMessage(""), 2000);
       } catch (error) {
         console.error("Failed to generate or download PDF:", error);
+        setMessage("PDFの生成またはダウンロードに失敗しました。");
+      } finally {
+        setIsLoading(false);
+        if (pdfObjectUrl) {
+          URL.revokeObjectURL(pdfObjectUrl);
+        }
       }
-      setIsLoading(false);
     };
 
     return (
