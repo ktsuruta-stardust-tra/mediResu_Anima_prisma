@@ -161,7 +161,8 @@ export default function previewWorkHistory() {
         otherData,userExperienceFormData,
         jobHistory,jobSummary,skills
     }= useLoaderData<any>();
-
+    console.log(categoryOperationDict1to4)
+    
     const historyArray = [];
     if(jobHistory){
         for ( let i = 0;i < jobHistory.length; i += 2){
