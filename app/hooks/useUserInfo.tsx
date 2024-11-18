@@ -7,7 +7,7 @@ export function useUserInfo(initialData:UserInfo){
     //前のデータと新しいデータの差分を更新？
 
     const updateFormData = (newData:Partial<UserInfo>) => {
-        console.log(formData);
+        // console.log(formData);
         setFormData((prevData) => ({
             ...prevData,
             ...newData,

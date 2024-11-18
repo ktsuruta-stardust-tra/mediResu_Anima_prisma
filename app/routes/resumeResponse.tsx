@@ -65,8 +65,6 @@ export const action:ActionFunction = async ({request}) => {
         if(receivedEmploymentData){
             // const UserEmploymentResult = await upsertUserBackgroundData(receivedEmploymentData, "employments");
 
-            console.log("emp")
-
             receivedEmploymentData.map(async (employmentData:any) => {
                 await upsertOrderNumPrisma(employmentData, "employments")
             })

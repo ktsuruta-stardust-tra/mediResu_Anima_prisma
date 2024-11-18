@@ -145,101 +145,127 @@ export default function previewResume(){
   
 
   return (
-    <div className="bg-gray-200 flex items-center justify-center min-h-screen">
-      {/* A4サイズの枠 */}
-      <div className="bg-white border border-gray-500 w-[297mm] h-[210mm] max-w-[297mm] max-h-[210mm] flex-shrink-0 relative">
-      <div         
-          style={{
-          transform: "scale(1.33)", // 必要な倍率に調整します
-          transformOrigin: "top left", // スケールの基準を左上に設定
-          }}
-        >
-      <div className="bg-white  relative">
-        <div className="absolute top-[27px] left-9 [font-family:'Inter',Helvetica] font-normal text-black text-sm tracking-[0] leading-[normal]">
-          履　歴　書
-        </div>
-        <div className="absolute w-[63px] h-2.5 top-[34px] left-[255px]">
-          <div className="absolute top-0.5 left-0 [font-family:'Inter',Helvetica] font-normal text-black text-[7px] tracking-[0] leading-[normal] whitespace-nowrap">
-            {year}年{month}月{day}日現在
-          </div>
+    <>
+      <style>
+        {`
+          @font-face {
+            font-family: 'Noto Sans JP';
+            src: url('/fonts/NotoSansJP-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+          }
 
-        </div>
-        
-        <PreviewUserInfo userInfo={userInfo?.length > 0? userInfo[0]:null} age={age}/>
+          @font-face {
+            font-family: 'Noto Sans JP';
+            src: url('/fonts/NotoSansJP-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+          }
 
-        <div className="flex flex-col w-[370px] items-start absolute top-[204px] left-9">
-          
-          <Career  year="年" month="月" detail="学　歴・職　歴"  status=""/>
-        
-          {emptyArrays.map((_,index)=> (
+          body, div, p,span {
+            font-family: 'Noto Sans JP', sans-serif !important;
+          }
+        `}
+      </style>
+      <main style={{ fontFamily: "'Noto Sans JP', sans-serif" }}>
+        <div className="bg-gray-200 flex items-center justify-center min-h-screen">
+          {/* A4サイズの枠 */}
+          <div className="bg-white border border-gray-500 w-[297mm] h-[210mm] max-w-[297mm] max-h-[210mm] flex-shrink-0 relative">
+          <div         
+              style={{
+              transform: "scale(1.33)", // 必要な倍率に調整します
+              transformOrigin: "top left", // スケールの基準を左上に設定
+              }}
+            >
+          <div className="bg-white  relative">
+            <div className="absolute top-[27px] left-9 [font-family:'Inter',Helvetica] font-normal text-black text-sm tracking-[0] leading-[normal]">
+              履　歴　書
+            </div>
+            <div className="absolute w-[63px] h-2.5 top-[34px] left-[255px]">
+              <div className="absolute top-0.5 left-0 [font-family:'Inter',Helvetica] font-normal text-black text-[7px] tracking-[0] leading-[normal] whitespace-nowrap">
+                {year}年{month}月{day}日現在
+              </div>
+
+            </div>
             
-            <Career key={index} year={firstList[index]?.year} month={firstList[index]?.month} detail={firstList[index]?.name}  status={firstList[index]?.status}/>
+            <PreviewUserInfo userInfo={userInfo?.length > 0? userInfo[0]:null} age={age}/>
 
-          ))}
-          
-        </div>
-
-        <div className="flex flex-col w-[370px] items-start absolute top-[50px] left-[436px]">
-          <div className="flex flex-col items-start relative self-stretch w-full flex-[0_0_auto]">
-            <div className="flex items-center relative self-stretch w-full flex-[0_0_auto]">
+            <div className="flex flex-col w-[370px] items-start absolute top-[204px] left-9">
+              
               <Career  year="年" month="月" detail="学　歴・職　歴"  status=""/>
-            </div>
-
-            {emptyRightArrays.map((_,index) =>(
-              <Career key={index} year={secondList[index]?.year} month={secondList[index]?.month} detail={secondList[index]?.name}  status={secondList[index]?.status}/>
-            ))}
             
-          </div>
+              {emptyArrays.map((_,index)=> (
+                
+                <Career key={index} year={firstList[index]?.year} month={firstList[index]?.month} detail={firstList[index]?.name}  status={firstList[index]?.status}/>
 
-          <div className="flex flex-col items-start relative self-stretch w-full flex-[0_0_auto]">
-            <div className="flex items-center relative self-stretch w-full flex-[0_0_auto]">
-              
-              <Career  year="年" month="月" detail="免　許・資　格"  status=""/>
-            </div>
-
-            {emptyRightArrays.map((_,index) =>(
-              <Career 
-                key={index} 
-                year={licenseList[index]?.year} 
-                month={licenseList[index]?.month} 
-                detail={licenseList[index]?.name} 
-                status={licenseList[index]?.status} 
-              />
-            ))}
-            
-          </div>
-        </div>
-
-        <div className="flex flex-col w-[372px] items-start absolute top-[314px] left-[436px]">
-          <div className="flex h-[23px] items-center gap-2.5 px-[7px] py-1.5 relative self-stretch w-full mt-[-1.00px] ml-[-1.00px] mr-[-1.00px] bg-white border border-solid border-black">
-            <div className="relative w-fit [font-family:'Inter',Helvetica] font-normal text-black text-[7px] tracking-[0] leading-[normal] whitespace-nowrap">
-              志望の動機、自己PRなど
-            </div>
-          </div>
-
-          <div className="flex h-[106px] px-0 py-2.5 relative self-stretch w-full mb-[-1.00px] ml-[-1.00px] mr-[-1.00px] mt-[-1.00px] bg-white border border-solid border-black">
-            <div className="w-[350px] mt-[-3.50px] mb-[-0.50px] ml-2 text-[#000000] text-[8px] text-left leading-[11px] relative [font-family:'Inter',Helvetica] font-normal tracking-[0]">
-              {userPr?.length > 0 ? userPr[0].self_pr_text:""}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col w-[372px] h-[123px] items-start absolute top-[456px] left-[436px]">
-          <div className="flex h-[23px] items-center gap-2.5 px-[7px] py-1.5 relative self-stretch w-full mt-[-1.00px] ml-[-1.00px] mr-[-1.00px] bg-white border border-solid border-black">
-            <div className="w-fit text-black text-[7px] leading-[normal] whitespace-nowrap relative [font-family:'Inter',Helvetica] font-normal tracking-[0]">
-              本人希望記入欄（特に給料、職種、勤務時間、勤務地、その他についての希望などがあれば記入）
-            </div>
-          </div>
-
-          <div className="flex h-[106px] items-center justify-center px-0 py-2.5 relative self-stretch w-full mb-[-1.00px] ml-[-1.00px] mr-[-1.00px] mt-[-1.00px] bg-white border border-solid border-black">
-            <div className="w-[350px] mt-[-3.50px] mb-[-0.50px] text-[#000000] text-[8px] text-justify leading-[11px] relative [font-family:'Inter',Helvetica] font-normal tracking-[0]">
+              ))}
               
             </div>
-          </div>
+
+            <div className="flex flex-col w-[370px] items-start absolute top-[50px] left-[436px]">
+              <div className="flex flex-col items-start relative self-stretch w-full flex-[0_0_auto]">
+                <div className="flex items-center relative self-stretch w-full flex-[0_0_auto]">
+                  <Career  year="年" month="月" detail="学　歴・職　歴"  status=""/>
+                </div>
+
+                {emptyRightArrays.map((_,index) =>(
+                  <Career key={index} year={secondList[index]?.year} month={secondList[index]?.month} detail={secondList[index]?.name}  status={secondList[index]?.status}/>
+                ))}
+                
+              </div>
+
+              <div className="flex flex-col items-start relative self-stretch w-full flex-[0_0_auto]">
+                <div className="flex items-center relative self-stretch w-full flex-[0_0_auto]">
+                  
+                  <Career  year="年" month="月" detail="免　許・資　格"  status=""/>
+                </div>
+
+                {emptyRightArrays.map((_,index) =>(
+                  <Career 
+                    key={index} 
+                    year={licenseList[index]?.year} 
+                    month={licenseList[index]?.month} 
+                    detail={licenseList[index]?.name} 
+                    status={licenseList[index]?.status} 
+                  />
+                ))}
+                
+              </div>
+            </div>
+
+            <div className="flex flex-col w-[372px] items-start absolute top-[314px] left-[436px]">
+              <div className="flex h-[23px] items-center gap-2.5 px-[7px] py-1.5 relative self-stretch w-full mt-[-1.00px] ml-[-1.00px] mr-[-1.00px] bg-white border border-solid border-black">
+                <div className="relative w-fit [font-family:'Inter',Helvetica] font-normal text-black text-[7px] tracking-[0] leading-[normal] whitespace-nowrap">
+                  志望の動機、自己PRなど
+                </div>
+              </div>
+
+              <div className="flex h-[106px] px-0 py-2.5 relative self-stretch w-full mb-[-1.00px] ml-[-1.00px] mr-[-1.00px] mt-[-1.00px] bg-white border border-solid border-black">
+                <div className="w-[350px] mt-[-3.50px] mb-[-0.50px] ml-2 text-[#000000] text-[8px] text-left leading-[11px] relative [font-family:'Inter',Helvetica] font-normal tracking-[0]">
+                  {userPr?.length > 0 ? userPr[0].self_pr_text:""}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col w-[372px] h-[123px] items-start absolute top-[456px] left-[436px]">
+              <div className="flex h-[23px] items-center gap-2.5 px-[7px] py-1.5 relative self-stretch w-full mt-[-1.00px] ml-[-1.00px] mr-[-1.00px] bg-white border border-solid border-black">
+                <div className="w-fit text-black text-[7px] leading-[normal] whitespace-nowrap relative [font-family:'Inter',Helvetica] font-normal tracking-[0]">
+                  本人希望記入欄（特に給料、職種、勤務時間、勤務地、その他についての希望などがあれば記入）
+                </div>
+              </div>
+
+              <div className="flex h-[106px] items-center justify-center px-0 py-2.5 relative self-stretch w-full mb-[-1.00px] ml-[-1.00px] mr-[-1.00px] mt-[-1.00px] bg-white border border-solid border-black">
+                <div className="w-[350px] mt-[-3.50px] mb-[-0.50px] text-[#000000] text-[8px] text-justify leading-[11px] relative [font-family:'Inter',Helvetica] font-normal tracking-[0]">
+                  
+                </div>
+              </div>
+              </div>
+            </div>
+            </div>
           </div>
         </div>
-        </div>
-      </div>
-    </div>
+      </main>
+
+    </>
   );
 };

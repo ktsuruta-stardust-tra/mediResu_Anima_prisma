@@ -15,7 +15,7 @@ export let action = async ({ request }) => {
 
   try{
     const data = await request.json();  // リクエストボディを取得
-    console.log("Received data:", data);
+    // console.log("Received data:", data);
     const {userId} = data;
     if(!userId){
       return json({ success: false, message: "line_id is required" }, { status: 400 });

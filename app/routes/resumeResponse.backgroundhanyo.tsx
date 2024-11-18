@@ -116,7 +116,7 @@ export default function ResumeLayout(){
       if(isFormValid){
         setIsErrorShow(false);
       }
-      console.log(isFormValid);
+      // console.log(isFormValid);
       setPage2IsValid(isFormValid);
     },[isFormValid,setPage2IsValid])
 
