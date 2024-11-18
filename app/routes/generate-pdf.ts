@@ -25,13 +25,13 @@ export const action: ActionFunction = async ({ request }) => {
 
 
     // Chromiumバイナリのパスを確認
-    const executablePath = await chromium.executablePath;
+    const executablePath = await chromium.executablePath();
 
     console.log("Chromium executablePath:", executablePath);
 
     const browser = await puppeteer.launch({
       args: chromium.args, // 必要な引数を設定
-      executablePath: await chromium.executablePath, // Chromiumのパスを指定
+      executablePath: await chromium.executablePath(), // Chromiumのパスを指定
       headless: chromium.headless, // headlessモードを有効化
     });
 
@@ -43,8 +43,6 @@ export const action: ActionFunction = async ({ request }) => {
     await page.goto(fullUrl, {
       waitUntil: "networkidle0", // ページが完全に読み込まれるのを待つ
     });
-
-
 
     // A4サイズでPDFを生成
     const pdfBuffer = await page.pdf({
