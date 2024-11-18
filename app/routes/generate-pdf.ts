@@ -15,7 +15,14 @@ export const action: ActionFunction = async ({ request }) => {
 
     console.log(executablePath)
     const browser = await chromium.puppeteer.launch({
-      args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
+      args: [
+        ...chromium.args,
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--disable-gpu",
+      ],
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath,
       headless: true, // 本番・ローカル両方で動作可能
