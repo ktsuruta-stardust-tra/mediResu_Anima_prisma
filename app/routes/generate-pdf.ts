@@ -33,14 +33,21 @@ export const action: ActionFunction = async ({ request }) => {
     console.log("Chromium executablePath:", executablePath);
 
     const browser = await puppeteer.launch({
-      args: chromium.args, // 必要な引数を設定
-      executablePath: await chromium.executablePath(), // Chromiumのパスを指定
-      headless: chromium.headless, // headlessモードを有効化
+      args: [
+        ...chromium.args, // Chromiumの基本引数
+        "--font-render-hinting=none",          // フォントのヒンティングを無効化
+        "--enable-font-antialiasing",          // アンチエイリアスを有効化
+        "--disable-gpu",                       // 必要に応じてGPUを無効化
+        "--no-sandbox",                        // サンドボックスを無効化
+        "--disable-setuid-sandbox",            // セットUIDサンドボックスを無効化
+        "--lang=ja-JP",                        // 言語設定を日本語に
+      ],
+      executablePath, // Chromiumの実行可能パスを指定
+      headless: chromium.headless, // ヘッドレスモードを有効化
     });
 
-
     const page = await browser.newPage();
-    
+
     // Cookieをリクエストヘッダーに設定
     await page.setExtraHTTPHeaders({
       Cookie: cookies,

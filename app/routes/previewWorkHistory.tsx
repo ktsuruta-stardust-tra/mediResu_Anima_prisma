@@ -96,10 +96,7 @@ export const loader = async ({request}) => {
           where: { user_id: userId },
         }),
   
-      ]);
-
-    console.log(userOperations,jobHistory)
-    
+      ]);    
 
     // 辞書を生成
     // 空の辞書を定義
@@ -162,7 +159,6 @@ export default function previewWorkHistory() {
         otherData,userExperienceFormData,
         jobHistory,jobSummary,skills
     }= useLoaderData<any>();
-    console.log(categoryOperationDict1to4)
     
     const historyArray = [];
     if(jobHistory){
