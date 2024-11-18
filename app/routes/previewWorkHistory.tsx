@@ -169,22 +169,26 @@ export default function previewWorkHistory() {
         }
     }
     return(
-        <main>
-            <WorkHistoryPageOne 
-                jobSummary={jobSummary ?  jobSummary[0]: ""} 
-                skills={skills ? skills[0]: ""}
-                categoryOne={categoryOperationDict1to4}
-                categoryTwo={categoryOperationDict5andAbove}
-                experience={userExperienceFormData ? userExperienceFormData[0]:""}
-            />
-            <WorkHistoryPageTwo />
+      <main
+          style={{
+            fontFamily: "'Noto Sans JP', sans-serif", // Googleフォントを適用
+          }}
+      >
+        <WorkHistoryPageOne 
+            jobSummary={jobSummary ?  jobSummary[0]: ""} 
+            skills={skills ? skills[0]: ""}
+            categoryOne={categoryOperationDict1to4}
+            categoryTwo={categoryOperationDict5andAbove}
+            experience={userExperienceFormData ? userExperienceFormData[0]:""}
+        />
+        <WorkHistoryPageTwo />
 
-            {historyArray.map((element,index) =>(
-                <div key={index}>
-                    <WorkHistoryPageThree jobHistoryOne= {element[0] ? element[0]:""} jobHistoryTwo={element[1] ? element[1]:""}/>
-                </div>
-            ))}
-        </main>
+        {historyArray.map((element,index) =>(
+            <div key={index}>
+                <WorkHistoryPageThree jobHistoryOne= {element[0] ? element[0]:""} jobHistoryTwo={element[1] ? element[1]:""}/>
+            </div>
+        ))}
+      </main>
     );
 
 }
