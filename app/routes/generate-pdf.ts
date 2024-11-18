@@ -15,6 +15,8 @@ export const action: ActionFunction = async ({ request }) => {
   try{
     const { url: relativeUrl , landscape} = await request.json();
     const fullUrl = `${new URL(request.url).origin}${relativeUrl}`;
+    // リクエストヘッダーからCookieを取得
+    const cookies = request.headers.get("Cookie") || "";
 
     // const url = new URL(request.url);
     // const pageUrl = `${url.origin}/previewWorkHistory`; // PDFに変換したいページのURL
@@ -27,6 +29,7 @@ export const action: ActionFunction = async ({ request }) => {
     // Chromiumバイナリのパスを確認
     const executablePath = await chromium.executablePath();
 
+    console.log("full:",fullUrl)
     console.log("Chromium executablePath:", executablePath);
 
     const browser = await puppeteer.launch({
@@ -37,7 +40,11 @@ export const action: ActionFunction = async ({ request }) => {
 
 
     const page = await browser.newPage();
-
+    
+    // Cookieをリクエストヘッダーに設定
+    await page.setExtraHTTPHeaders({
+      Cookie: cookies,
+    });
 
     // PDFに変換したいページにアクセス
     await page.goto(fullUrl, {
