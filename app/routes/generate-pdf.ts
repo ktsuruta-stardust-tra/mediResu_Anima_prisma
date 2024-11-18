@@ -1,66 +1,80 @@
-import { ActionFunction } from "@remix-run/node";
-import chromium from "@sparticuz/chrome-aws-lambda"
+// app/routes/preview2PdfWorkHistory.tsx
+import { ActionFunction, json } from "@remix-run/node";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
+
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+// const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// PDF生成のAction関数
 
 export const action: ActionFunction = async ({ request }) => {
-  try {
-    const { url: relativeUrl, landscape } = await request.json();
 
-    if (!relativeUrl || typeof relativeUrl !== "string") {
-      return new Response("Invalid URL", { status: 400 });
-    }
-
+  
+  try{
+    const { url: relativeUrl , landscape} = await request.json();
     const fullUrl = `${new URL(request.url).origin}${relativeUrl}`;
-    console.log("Generating PDF for URL:", fullUrl);
-    const executablePath = await chromium.executablePath || "/usr/bin/google-chrome-stable";
 
-    console.log(executablePath)
-    const browser = await chromium.puppeteer.launch({
-      args: [
-        ...chromium.args,
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
-        "--disable-gpu",
-      ],
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
-      headless: true, // 本番・ローカル両方で動作可能
+    // const url = new URL(request.url);
+    // const pageUrl = `${url.origin}/previewWorkHistory`; // PDFに変換したいページのURL
+
+    //const browser = await puppeteer.launch();
+
+    // PuppeteerをChromiumバイナリで起動
+
+
+    // Chromiumバイナリのパスを確認
+    const executablePath = await chromium.executablePath;
+
+    console.log("Chromium executablePath:", executablePath);
+
+    const browser = await puppeteer.launch({
+      args: chromium.args, // 必要な引数を設定
+      executablePath: await chromium.executablePath, // Chromiumのパスを指定
+      headless: chromium.headless, // headlessモードを有効化
     });
+
 
     const page = await browser.newPage();
 
-    try {
-      await page.goto(fullUrl, {
-        waitUntil: "domcontentloaded", // パフォーマンス改善
-      });
-    } catch (gotoError) {
-      console.error("Failed to navigate to the page:", gotoError);
-      return new Response("Failed to load the page for PDF generation", { status: 500 });
-    }
 
+    // PDFに変換したいページにアクセス
+    await page.goto(fullUrl, {
+      waitUntil: "networkidle0", // ページが完全に読み込まれるのを待つ
+    });
+
+
+
+    // A4サイズでPDFを生成
     const pdfBuffer = await page.pdf({
-      format: "a4",
-      landscape: landscape,
+      format: "A4",
+      landscape:landscape,
       printBackground: true,
       margin: { top: "0mm", right: "0mm", bottom: "0mm", left: "0mm" },
     });
 
+
+
     await browser.close();
 
+
+
+    // // PDFバッファをローカルに保存 (開発環境用)
+    // const filePath = path.resolve(__dirname, "../../public/work_history.pdf");
+    // fs.writeFileSync(filePath, pdfBuffer);
+
+    // PDFバッファをレスポンスとして返す
     return new Response(pdfBuffer, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": "attachment; filename=work_history.pdf",
-        "Content-Length": pdfBuffer.length.toString(), // 推奨
+        "Content-Disposition": "attachment; filename=work_history.pdf", // attachmentに変更
       },
     });
-  } catch (error) {
-    console.error("Error generating PDF:", error.message, error.stack);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+  }catch(error){
+    console.error("Error generating PDF:", error);
+    return new Response("Failed to generate PDF", { status: 500 });
   }
+
 };
