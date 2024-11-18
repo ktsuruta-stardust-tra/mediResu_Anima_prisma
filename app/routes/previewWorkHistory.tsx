@@ -175,11 +175,27 @@ export default function previewWorkHistory() {
     }, []);
     return(
       <>
-        {/* Google Fontsの読み込み */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap"
-          rel="stylesheet"
-        />
+      <style>
+        {`
+          @font-face {
+            font-family: 'Noto Sans JP';
+            src: url('/fonts/NotoSansJP-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+          }
+
+          @font-face {
+            font-family: 'Noto Sans JP';
+            src: url('/fonts/NotoSansJP-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+          }
+
+          body, div, p,span {
+            font-family: 'Noto Sans JP', sans-serif !important;
+          }
+        `}
+      </style>
 
         <main style={{ fontFamily: "'Noto Sans JP', sans-serif" }}>
         <WorkHistoryPageOne 
