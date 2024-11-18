@@ -7,6 +7,7 @@ import prisma from "~/utils/prismaClient";
 import { sessionStorage } from '~/utils/session';
 import { Prisma } from "@prisma/client";
 import { skillsExperiencesSchema } from "~/utils/zodSchemas";
+import { useEffect } from "react";
 // 辞書の型を定義
 interface CategoryOperationDict {
     [categoryName: string]: {
@@ -169,6 +170,13 @@ export default function previewWorkHistory() {
             historyArray.push(jobHistory.slice(i,i+2));
         }
     }
+
+    useEffect(() => {
+      // Google Fontsのロードを待機
+      document.fonts.ready.then(() => {
+        console.log("Fonts loaded!");
+      });
+    }, []);
     return(
       <>
         {/* Google Fontsの読み込み */}
