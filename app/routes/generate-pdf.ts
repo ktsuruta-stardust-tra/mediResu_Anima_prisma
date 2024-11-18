@@ -12,7 +12,7 @@ export const action: ActionFunction = async ({ request }) => {
     const fullUrl = `${new URL(request.url).origin}${relativeUrl}`;
 
     const browser = await chromium.puppeteer.launch({
-      args: chromium.args,
+      args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath,
       headless: true, // 本番・ローカル両方で動作可能
@@ -48,6 +48,9 @@ export const action: ActionFunction = async ({ request }) => {
     });
   } catch (error) {
     console.error("Error generating PDF:", error.message, error.stack);
-    return new Response("Failed to generate PDF", { status: 500 });
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 };
