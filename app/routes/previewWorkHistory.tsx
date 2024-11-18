@@ -170,11 +170,14 @@ export default function previewWorkHistory() {
         }
     }
     return(
-      <main
-          style={{
-            fontFamily: "'Noto Sans JP', sans-serif", // Googleフォントを適用
-          }}
-      >
+      <>
+        {/* Google Fontsの読み込み */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap"
+          rel="stylesheet"
+        />
+
+        <main style={{ fontFamily: "'Noto Sans JP', sans-serif" }}>
         <WorkHistoryPageOne 
             jobSummary={jobSummary ?  jobSummary[0]: ""} 
             skills={skills ? skills[0]: ""}
@@ -190,6 +193,7 @@ export default function previewWorkHistory() {
             </div>
         ))}
       </main>
+      </>
     );
 
 }
