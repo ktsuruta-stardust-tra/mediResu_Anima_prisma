@@ -100,11 +100,13 @@ export const loader = async ({request}) => {
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
     const userId = session.get("userId");
+    console.log("PPPPPPPPPPPPPP",userId);
     //const userId = 4
     if (!userId) {
         return new Response("User not authenticated", { status: 401 });
     }
-    
+
+
     try {
         const [userInfo, userEdus, userEmps, userLicenses, userPr] = await Promise.all([
           prisma.user_informations.findMany({
@@ -129,6 +131,7 @@ export const loader = async ({request}) => {
     
         // データの返却
         return json({
+          userId,
           userInfo,
           userEdus,
           userEmps,
@@ -137,6 +140,7 @@ export const loader = async ({request}) => {
         });
       } catch (error) {
         // エラーハンドリング
+        
         throw new Response("Error fetching data", { status: 500 });
       }
 
@@ -144,11 +148,11 @@ export const loader = async ({request}) => {
 
 export default function ResumeLayout(){
 
-    const {userInfo,userEdus,userEmps,userLicenses,userPr} = useLoaderData<any>();
-    const userId = useOutletContext<any>();
+    const {userId,userInfo,userEdus,userEmps,userLicenses,userPr} = useLoaderData<any>();
+    //const userId = useOutletContext<any>();
 
     const actionData = useActionData<ActionData>();// actionから返されたデータを受け取る
-    
+    console.log(userId,"Resuponse")
     //各フォームデータの初期化
     const initialData = userInfo?.length > 0 ? userInfo[0]:createInitialUserInfo(userId);
     const initialEducationData =  userEdus?.length > 0 ? userEdus:createInitialUserEducation(userId);

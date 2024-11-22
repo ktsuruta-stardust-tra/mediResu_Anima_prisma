@@ -97,6 +97,7 @@ export const loader = async ({request}) => {
     }, {} as Record<number, string>);
 
     return {
+      userId,
       categories,
       initialSelectedIds,
       otherInitialData,
@@ -177,12 +178,12 @@ export const action:ActionFunction = async ({request}) => {
 
 export default function ParentForm() {
 
-    const {categories,initialSelectedIds,
+    const {userId,categories,initialSelectedIds,
         otherInitialData,tempUserExperienceFormData,
         tempUserJobHistory,tempUserJobSummary,tempSkills
     }= useLoaderData<any>();
 
-    const userId = useOutletContext<any>();
+    //const userId = useOutletContext<any>();
 
 
       // `categories`から「その他」のIDと初期テキストを動的に生成

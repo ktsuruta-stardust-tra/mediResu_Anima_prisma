@@ -25,68 +25,61 @@ export let loader = async () => {
 
 export default function Index() {
 
-  const { liffId } = useLoaderData<typeof loader>();
+  const [saveStatus, setSaveStatus] = useState("");
+  const [userId, setUserId] = useState(null);
+  const [pushButton,setPushButton]=useState(false);
+  const [isLoading,setIsLoading]=useState(false);
+  const {liffId} =  useLoaderData();
   const navigate = useNavigate();
 
-  const [saveStatus, setSaveStatus] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!liffId) {
-      setSaveStatus("LIFF IDが見つかりません");
-      return;
-    }
-
-    liff.init({ liffId })
-      .then(() => {
-        if (liff.isLoggedIn()) {
-          handleProfileFetchAndSave();
-        }
-      })
-      .catch((error) => {
-        console.error("LIFF初期化エラー:", error);
-        setSaveStatus("LIFF初期化失敗");
-      });
-  }, [liffId]);
-
   const handleButtonClick = () => {
-    setIsLoading(true);
+    setPushButton(true);
+    setIsLoading(true); // 初期化開始
 
-    liff.init({ liffId })
-      .then(() => {
-        if (!liff.isLoggedIn()) {
-          liff.login({ redirectUri: window.location.href });
-        } else {
-          handleProfileFetchAndSave();
-        }
-      })
-      .catch((error) => {
-        console.error("LIFF初期化エラー:", error);
-        setSaveStatus("LIFF初期化失敗");
-        setIsLoading(false);
-      });
+    liff.init({ liffId }).then(() => {
+      if (liff.isLoggedIn()) {
+        handleProfileFetchAndSave();
+      } else {
+        liff.login({ redirectUri: window.location.href });
+      }
+    }).catch(error => {
+      console.error("LIFF初期化エラー:", error);
+      setSaveStatus("LIFF初期化失敗");
+      setIsLoading(false);
+    });
   };
 
-  const handleProfileFetchAndSave = () => {
-    setIsLoading(true);
+    // 状態が変わった後に処理を実行
+    useEffect(() => {
+      if (userId) {
+        console.log(userId,"index")
+        navigate("/top");
+      }
+    }, [userId]);
 
+  const handleProfileFetchAndSave = () => {
     getProfile()
-      .then((profile) => {
-        return sendProfileToServer(profile);
+      .then(profile => {
+        sendProfileToServer(profile)
+          .then(result => {
+            setSaveStatus(result.success ? "保存成功" : "保存失敗");
+
+            if (result.success && result.userId) {
+              setUserId(result.userId);
+              // navigate("/top"); // 成功時に「/top」ページへ遷移
+            }
+          })
+          .catch(error => {
+            console.error("プロフィールのサーバー送信エラー:", error);
+            setSaveStatus("保存失敗");
+          });
       })
-      .then((result) => {
-        if (result.success && result.userId) {
-          navigate("/top"); // 成功時に「/top」ページへ遷移
-        } else {
-          setSaveStatus("保存失敗");
-        }
-      })
-      .catch((error) => {
-        console.error("プロフィール処理エラー:", error);
-        setSaveStatus("プロフィール取得または保存に失敗しました");
+      .catch(error => {
+        console.error("プロフィール取得エラー:", error);
+        setSaveStatus("プロフィール取得失敗");
       })
       .finally(() => {
-        setIsLoading(false);
+        setIsLoading(false); // ロード状態解除
       });
   };
 
@@ -94,6 +87,17 @@ export default function Index() {
 
   return (
     <div className="bg-white flex flex-col justify-start items-center w-full min-h-screen">
+
+      {/* スピナー */}
+      {isLoading && (
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50 z-50">
+          <div
+              className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"
+              aria-label="読み込み中"
+          ></div>
+          </div>
+      )}
+
       <div className="bg-white overflow-hidden w-[375px]">
         <div className="flex flex-col w-[375px] items-center gap-5 px-5 py-10 bg-[#24b6ae]">
           <HeaderComp className="!flex-[0_0_auto]" group="/img/group-18-1.png" />

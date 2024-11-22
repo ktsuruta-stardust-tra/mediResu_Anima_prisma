@@ -127,6 +127,7 @@ export default function ResumeLayout(){
       value:string | number
     ) => {
       updateEducationFormData({order_num,[field]:value},"order_num")
+      console.log(educationFormData,"PPPPPPPP")
     };
 
     const employmentHandleInputChange = (
