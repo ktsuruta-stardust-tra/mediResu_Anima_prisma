@@ -11,6 +11,8 @@ import liff from "@line/liff";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData,useNavigate } from "@remix-run/react";
 
+
+
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
